@@ -484,3 +484,10 @@ SQLPARSE_FORMAT_OPTIONS = {
     "reindent": parse_boolean(os.environ.get("SQLPARSE_FORMAT_REINDENT", "true")),
     "keyword_case": os.environ.get("SQLPARSE_FORMAT_KEYWORD_CASE", "upper"),
 }
+
+# Session lifetime in seconds to use in the Flask app for permanent_session_lifetime
+PERMANENT_SESSION_LIFETIME = int(os.environ.get("REDASH_SESSION_LIFETIME", "10"))
+
+# Turn off session refresh on each request in the Flask app
+SESSION_REFRESH_EACH_REQUEST = False
+
