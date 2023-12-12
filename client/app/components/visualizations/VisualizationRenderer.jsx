@@ -97,6 +97,7 @@ VisualizationRenderer.propTypes = {
   filters: FiltersType,
   onFiltersChange: PropTypes.func,
   context: PropTypes.oneOf(["query", "widget"]).isRequired,
+  queryResultUpdated: PropTypes.bool
 };
 
 VisualizationRenderer.defaultProps = {
