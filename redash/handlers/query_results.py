@@ -2,7 +2,7 @@ import unicodedata
 from urllib.parse import quote
 
 import regex
-from flask import make_response, request
+from flask import make_response, request, Response
 from flask_login import current_user
 from flask_restful import abort
 
@@ -307,6 +307,10 @@ class QueryResultResource(BaseResource):
         # should check for query parameters and shouldn't cache the result).
         should_cache = query_result_id is not None
 
+        parameter_values = collect_parameters_from_request(request.args)
+        max_age = int(request.args.get("maxAge", 0))
+        partial = request.args.get("partial") == "true"
+
         query_result = None
         query = None
 
@@ -356,6 +360,10 @@ class QueryResultResource(BaseResource):
                 "csv": self.make_csv_response,
                 "tsv": self.make_tsv_response,
             }
+
+            if filetype == "json":
+                return self.make_json_response(query_result, partial)
+
             response = response_builders[filetype](query_result)
 
             if len(settings.ACCESS_CONTROL_ALLOW_ORIGIN) > 0:
@@ -375,9 +383,13 @@ class QueryResultResource(BaseResource):
             abort(404, message="No cached result found for this query.")
 
     @staticmethod
-    def make_json_response(query_result):
-        data = json_dumps({"query_result": query_result.to_dict()})
+    def make_json_response(query_result, partial):
         headers = {"Content-Type": "application/json"}
+        dict = query_result.to_dict()
+        if partial:
+            partial_rows = dict["data"]["rows"][:1000]
+            dict["data"]["rows"] = partial_rows
+        data = json_dumps({"query_result": dict})
         return make_response(data, 200, headers)
 
     @staticmethod
