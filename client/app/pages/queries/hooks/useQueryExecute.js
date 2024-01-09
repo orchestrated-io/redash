@@ -4,7 +4,6 @@ import recordEvent from "@/services/recordEvent";
 import { ExecutionStatus } from "@/services/query-result";
 import notifications from "@/services/notifications";
 import useImmutableCallback from "@/lib/hooks/useImmutableCallback";
-// import { flushSync } from "react-dom";
 
 function getMaxAge() {
   const { maxAge } = location.search;
@@ -81,21 +80,15 @@ export default function useQueryExecute(query) {
           notifications.showNotification("Redash", `${query.name} updated.`);
         }
 
-        // Flush here to ensure that the partial query result is visible early
-        // (before the full query result is available).
-        // This should be done sparingly - see https://react.dev/reference/react-dom/flushSync
-
-        // flushSync(() => {
-          setExecutionState({
-            queryResult,
-            loadedInitialResults: true,
-            loadedFullResults: instance > 0,
-            error: null,
-            isExecuting: false,
-            isCancelling: false,
-            executionStatus: null,
-          });
-        // });
+        setExecutionState({
+          queryResult,
+          loadedInitialResults: true,
+          loadedFullResults: instance > 0,
+          error: null,
+          isExecuting: false,
+          isCancelling: false,
+          executionStatus: null,
+        });
       }
     }
 
