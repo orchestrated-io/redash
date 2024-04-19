@@ -65,6 +65,7 @@
     "numeral": "^2.0.6",
     "path-to-regexp": "^3.1.0",
     "prop-types": "^15.6.1",
+    "puppeteer": "^22.6.5",
     "query-string": "^6.9.0",
     "react": "16.14.0",
     "react-ace": "^9.1.1",
@@ -129,7 +130,7 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^4.5.2",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^24.1.0",
+    "jest": "^24.9.0",
     "less": "^3.13.1",
     "less-loader": "^5.0.0",
     "less-plugin-autoprefix": "^2.0.0",
@@ -179,8 +180,8 @@
     ]
   },
   "browser": {
-      "fs": false,
-      "path": false
+    "fs": false,
+    "path": false
   },
   "//": "browserslist set to 'Async functions' compatibility",
   "browserslist": [
