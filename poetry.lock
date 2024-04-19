@@ -1087,6 +1087,21 @@ files = [
 dev = ["Sphinx", "coverage", "flake8", "lxml", "lxml-stubs", "memory-profiler", "memray", "mypy", "tox", "xmlschema (>=2.0.0)"]
 
 [[package]]
+name = "email-validator"
+version = "2.1.1"
+description = "A robust email address syntax and deliverability validation library."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "email_validator-2.1.1-py3-none-any.whl", hash = "sha256:97d882d174e2a65732fb43bfce81a3a834cbc1bde8bf419e30ef5ea976370a05"},
+    {file = "email_validator-2.1.1.tar.gz", hash = "sha256:200a70680ba08904be6d1eef729205cc0d687634399a5924d842533efb824b84"},
+]
+
+[package.dependencies]
+dnspython = ">=2.0.0"
+idna = ">=2.0.0"
+
+[[package]]
 name = "environs"
 version = "11.0.0"
 description = "simplified environment variable parsing"
@@ -5196,20 +5211,22 @@ files = [
 
 [[package]]
 name = "wtforms"
-version = "3.1.2"
-description = "Form validation and rendering for Python web development."
+version = "2.3.3"
+description = "A flexible forms validation and rendering library for Python web development."
 optional = false
-python-versions = ">=3.8"
+python-versions = "*"
 files = [
-    {file = "wtforms-3.1.2-py3-none-any.whl", hash = "sha256:bf831c042829c8cdbad74c27575098d541d039b1faa74c771545ecac916f2c07"},
-    {file = "wtforms-3.1.2.tar.gz", hash = "sha256:f8d76180d7239c94c6322f7990ae1216dae3659b7aa1cee94b6318bdffb474b9"},
+    {file = "WTForms-2.3.3-py2.py3-none-any.whl", hash = "sha256:7b504fc724d0d1d4d5d5c114e778ec88c37ea53144683e084215eed5155ada4c"},
+    {file = "WTForms-2.3.3.tar.gz", hash = "sha256:81195de0ac94fbc8368abbaf9197b88c4f3ffd6c2719b5bf5fc9da744f3d829c"},
 ]
 
 [package.dependencies]
-markupsafe = "*"
+MarkupSafe = "*"
 
 [package.extras]
 email = ["email-validator"]
+ipaddress = ["ipaddress"]
+locale = ["Babel (>=1.3)"]
 
 [[package]]
 name = "xlrd"
@@ -5346,4 +5363,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.11"
-content-hash = "96695dc64900df55a521ae9113dc066e6fd91a3821fc5ecadf96a2128cad1e28"
+content-hash = "b8e2b106fe651027aa6b23a8d895cb11b2e3386d0269062d541c6aee2935f799"
