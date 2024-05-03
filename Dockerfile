@@ -102,7 +102,7 @@ USER redash
 # Customized runtime environment variables
 ENV REDASH_WEB_WORKERS=8
 ENV KEEP_ALIVE=305
-ENV LOG_LEVEL=debug
+ENV LOG_LEVEL="info"
 
 ENTRYPOINT ["/app/bin/docker-entrypoint"]
 CMD ["server"]
