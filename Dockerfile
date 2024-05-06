@@ -101,6 +101,7 @@ USER redash
 
 # Customized runtime environment variables
 ENV REDASH_WEB_WORKERS=8
+ENV WORKER_COUNT=3
 ENV KEEP_ALIVE=305
 ENV LOG_LEVEL="info"
 

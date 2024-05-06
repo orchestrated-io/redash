@@ -20,6 +20,7 @@ x-redash-environment: &redash-environment
   REDASH_ENFORCE_CSRF: "true"
   # See https://github.com/getredash/redash/pull/5783
   REDASH_WEB_WORKERS: 8
+  WORKERS_COUNT: 3
   KEEP_ALIVE: 305
   LOG_LEVEL: info
   # Set secret keys in the .env file

@@ -16,7 +16,7 @@ dev_scheduler() {
 worker() {
   echo "Starting RQ worker..."
 
-  export WORKERS_COUNT=${WORKERS_COUNT:-2}
+  export WORKERS_COUNT=${WORKERS_COUNT:-3}
   export QUEUES=${QUEUES:-}
 
   exec supervisord -c worker.conf
