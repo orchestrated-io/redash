@@ -103,7 +103,7 @@ USER redash
 ENV REDASH_WEB_WORKERS=8
 ENV WORKER_COUNT=3
 ENV KEEP_ALIVE=305
-ENV LOG_LEVEL="info"
+ENV LOG_LEVEL="warn"
 
 ENTRYPOINT ["/app/bin/docker-entrypoint"]
 CMD ["server"]
