@@ -163,7 +163,9 @@ REFERRER_POLICY = os.environ.get(
 # an empty value.
 # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
 # for more information.
-FEATURE_POLICY = os.environ.get("REDASH_REFERRER_POLICY", "")
+
+# NOTE: 'Feature-Policy' header is now set as 'Permissions-Policy' via a flask-talisman patch
+FEATURE_POLICY = os.environ.get("REDASH_FEATURE_POLICY", "")
 
 MULTI_ORG = parse_boolean(os.environ.get("REDASH_MULTI_ORG", "false"))
 
