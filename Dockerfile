@@ -99,6 +99,9 @@ COPY --from=frontend-builder /frontend/client/dist /app/client/dist
 RUN chown -R redash /app
 USER redash
 
+# Patch 'Feature-Policy' header to 'Permissions-Policy'
+COPY ./patches/talisman.py /usr/local/lib/python3.7/site-packages/talisman.py
+
 # Customized runtime environment variables
 ENV REDASH_WEB_WORKERS=8
 ENV WORKER_COUNT=3
