@@ -31,7 +31,7 @@ RUN yarn build
 
 FROM frontend-builder-${FRONTEND_BUILD_MODE} as frontend-builder
 
-FROM python:3.8-slim-bookworm
+FROM python:3.9-slim-bookworm
 
 EXPOSE 5000
 
