@@ -86,7 +86,7 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
 
 WORKDIR /app
 
-ENV POETRY_VERSION=1.6.1
+ENV POETRY_VERSION=1.8.5
 ENV POETRY_HOME=/etc/poetry
 ENV POETRY_VIRTUALENVS_CREATE=false
 RUN curl -sSL https://install.python-poetry.org | python3 -
