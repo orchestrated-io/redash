@@ -1,8 +1,8 @@
 [project]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 
 [tool.black]
-target-version = ['py39']
+target-version = ['py311']
 line-length = 119
 force-exclude = '''
 /(
@@ -22,7 +22,7 @@ maintainers = [
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.11"
+python = ">=3.11,<3.14"
 advocate = "1.0.0"
 aniso8601 = "8.0.0"
 authlib = "1.6.0"

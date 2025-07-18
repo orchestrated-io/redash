@@ -2,18 +2,18 @@
 ARG FRONTEND_BUILD_MODE=0
 
 # MODE 0: create empty files. useful for backend tests
-FROM alpine:3.19 as frontend-builder-0
+FROM alpine:3.22 as frontend-builder-0
 RUN \
   mkdir -p /frontend/client/dist && \
   touch /frontend/client/dist/multi_org.html && \
   touch /frontend/client/dist/index.html
 
 # MODE 1: copy static frontend from host, useful for CI to ignore building static content multiple times
-FROM alpine:3.19 as frontend-builder-1
+FROM alpine:3.22 as frontend-builder-1
 COPY client/dist /frontend/client/dist
 
 # MODE 2: build static content in docker, can be used for a local development
-FROM node:18-bookworm as frontend-builder-2
+FROM node:20-bookworm as frontend-builder-2
 RUN npm install --global --force yarn@1.22.22
 ENV CYPRESS_INSTALL_BINARY=0
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
@@ -31,7 +31,7 @@ RUN yarn build
 
 FROM frontend-builder-${FRONTEND_BUILD_MODE} as frontend-builder
 
-FROM python:3.9-slim-bookworm
+FROM python:3.11-slim-bookworm
 
 EXPOSE 5000
 
