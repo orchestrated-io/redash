@@ -31,7 +31,7 @@ RUN yarn build
 
 FROM frontend-builder-${FRONTEND_BUILD_MODE} as frontend-builder
 
-FROM python:3.11-slim-bookworm
+FROM python:3.10-slim-bookworm
 
 EXPOSE 5000
 
@@ -46,8 +46,11 @@ RUN apt-get update && \
   build-essential \
   pwgen \
   libffi-dev \
+  ca-certificates \
   sudo \
   git-core \
+  gcc \
+  libc6-dev \
   # Kerberos, needed for MS SQL Python driver to compile on arm64
   libkrb5-dev \
   # Postgres client
@@ -89,7 +92,8 @@ WORKDIR /app
 ENV POETRY_VERSION=1.8.5
 ENV POETRY_HOME=/etc/poetry
 ENV POETRY_VIRTUALENVS_CREATE=false
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN (curl -sSL https://install.python-poetry.org | python3 -) \
+    || (cat /app/poetry-installer-error*.log && false)
 
 COPY pyproject.toml poetry.lock ./
 
