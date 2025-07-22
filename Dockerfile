@@ -51,6 +51,8 @@ RUN apt-get update && \
   git-core \
   gcc \
   libc6-dev \
+  # Python development headers (needed for C extensions like sasl)
+  # python3.10-dev \
   # Kerberos, needed for MS SQL Python driver to compile on arm64
   libkrb5-dev \
   # Postgres client
