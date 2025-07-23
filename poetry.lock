@@ -1146,18 +1146,17 @@ thrift = "*"
 
 [[package]]
 name = "elementpath"
-version = "5.0.3"
+version = "4.8.0"
 description = "XPath 1.0/2.0/3.0/3.1 parsers and selectors for ElementTree and lxml"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.8"
 files = [
-    {file = "elementpath-5.0.3-py3-none-any.whl", hash = "sha256:8c93540556f743835b3c682a7bdb2d97371ee1e151430ff35498b59f2c14e5a0"},
-    {file = "elementpath-5.0.3.tar.gz", hash = "sha256:61040ca014769d507ce19d26521a4bf1c64d2bd0776466e45030dbfe181f7062"},
+    {file = "elementpath-4.8.0-py3-none-any.whl", hash = "sha256:5393191f84969bcf8033b05ec4593ef940e58622ea13cefe60ecefbbf09d58d9"},
+    {file = "elementpath-4.8.0.tar.gz", hash = "sha256:5822a2560d99e2633d95f78694c7ff9646adaa187db520da200a8e9479dc46ae"},
 ]
 
 [package.extras]
-dev = ["coverage", "flake8", "lxml", "lxml-stubs", "memray", "mypy", "psutil", "sphinx", "tox", "xmlschema (>=4.0.1)"]
-docs = ["readthedocs-sphinx-search", "sphinx"]
+dev = ["Sphinx", "coverage", "flake8", "lxml", "lxml-stubs", "memory-profiler", "memray", "mypy", "tox", "xmlschema (>=3.3.2)"]
 
 [[package]]
 name = "email-validator"
@@ -5420,22 +5419,22 @@ files = [
 
 [[package]]
 name = "xmlschema"
-version = "4.1.0"
+version = "3.3.0"
 description = "An XML Schema validator and decoder"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.8"
 files = [
-    {file = "xmlschema-4.1.0-py3-none-any.whl", hash = "sha256:eabf610f398a58700bc4ac94380ad9ce558297a3f9ca8b7722ed3f7888eb4498"},
-    {file = "xmlschema-4.1.0.tar.gz", hash = "sha256:88ac771cf94d5fc6bbd1a763db8c157f3d683ad23120b0d0b8c46fe4537f2adf"},
+    {file = "xmlschema-3.3.0-py3-none-any.whl", hash = "sha256:29fd761c705a90db771bca4252ee7967f036c2fa1012514dd782008c1354e665"},
+    {file = "xmlschema-3.3.0.tar.gz", hash = "sha256:3f603cd89f78ba94e467f6d9d9800fb42ee5f0bd2788202c794f4c1cdce41ab8"},
 ]
 
 [package.dependencies]
-elementpath = ">=5.0.1,<6.0.0"
+elementpath = ">=4.4.0,<5.0.0"
 
 [package.extras]
-codegen = ["jinja2"]
-dev = ["coverage", "flake8", "lxml", "lxml-stubs", "mypy", "psutil", "tox", "xmlschema[docs]"]
-docs = ["jinja2", "sphinx", "sphinx_rtd_theme"]
+codegen = ["elementpath (>=4.4.0,<5.0.0)", "jinja2"]
+dev = ["Sphinx", "coverage", "elementpath (>=4.4.0,<5.0.0)", "flake8", "jinja2", "lxml", "lxml-stubs", "memory-profiler", "mypy", "sphinx-rtd-theme", "tox"]
+docs = ["Sphinx", "elementpath (>=4.4.0,<5.0.0)", "jinja2", "sphinx-rtd-theme"]
 
 [[package]]
 name = "zipp"
@@ -5458,17 +5457,17 @@ type = ["pytest-mypy"]
 
 [[package]]
 name = "zope-event"
-version = "5.1"
+version = "5.1.1"
 description = "Very basic event publishing system"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "zope_event-5.1-py3-none-any.whl", hash = "sha256:53de8f0e9f61dc0598141ac591f49b042b6d74784dab49971b9cc91d0f73a7df"},
-    {file = "zope_event-5.1.tar.gz", hash = "sha256:a153660e0c228124655748e990396b9d8295d6e4f546fa1b34f3319e1c666e7f"},
+    {file = "zope_event-5.1.1-py3-none-any.whl", hash = "sha256:8d5ea7b992c42ce73a6fa9c2ba99a004c52cd9f05d87f3220768ef0329b92df7"},
+    {file = "zope_event-5.1.1.tar.gz", hash = "sha256:c1ac931abf57efba71a2a313c5f4d57768a19b15c37e3f02f50eb1536be12d4e"},
 ]
 
 [package.dependencies]
-setuptools = "*"
+setuptools = ">=75.8.2"
 
 [package.extras]
 docs = ["Sphinx"]
@@ -5643,4 +5642,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "106c335cfc47907b25e5690d152fbde6303b13a625ac2d832486ea5074163ae5"
+content-hash = "62af7cd095a6f77e3cc8afb9b0279c8b293f8005e36b44b89e68d61d72a85ba2"
