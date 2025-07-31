@@ -189,8 +189,6 @@ def login(org_slug=None):
     if current_user.is_authenticated:
         return redirect(next_path)
 
-    print(request.form.get("email"))
-    print(settings.TEAMFORM_ADMIN_EMAIL)
     if request.method == "POST" and (
         current_org.get_setting("auth_password_login_enabled")
         or request.form.get("email", "").lower() == settings.TEAMFORM_ADMIN_EMAIL.lower()
