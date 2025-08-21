@@ -16,7 +16,7 @@ const filterTypes = ["filter", "multi-filter", "multiFilter"];
 //   });
 
 function defer(instance = 0) {
-  const result = { onStatusChange: status => {} };
+  const result = { onStatusChange: (status) => {} };
   if (instance > 0) {
     result.promise2 = new Promise((resolve, reject) => {
       result.resolve2 = resolve;
@@ -362,25 +362,20 @@ class QueryResult {
     queryResult.deferred.onStatusChange(ExecutionStatus.LOADING_RESULT);
 
     axios
-<<<<<<< HEAD
-      .get(`api/queries/${queryId}/results/${id}.json`)
-      .then((response) => {
-=======
       .get(`api/queries/${queryId}/results/${id}.json?partial=${partial}`)
-      .then(response => {
->>>>>>> 499216e92 (Reapply changes from PR https://github.com/orchestrated-io/redash/pull/2)
+      .then((response) => {
         // Success handler
         queryResult.isLoadingResult = false;
         queryResult.update(response, 0);
 
         axios
           .get(`api/queries/${queryId}/results/${id}.json?partial=false`)
-          .then(response => {
+          .then((response) => {
             // Success handler
             queryResult.isLoadingResult = false;
             queryResult.update(response, 1);
           })
-          .catch(error => {
+          .catch((error) => {
             // Error handler
             queryResult.isLoadingResult = false;
             handleErrorResponse(queryResult, error, 1);
@@ -410,13 +405,10 @@ class QueryResult {
     this.isLoadingResult = true;
     this.deferred.onStatusChange(ExecutionStatus.LOADING_RESULT);
 
-<<<<<<< HEAD
-    QueryResultResource.get({ id: this.job.query_result_id })
-      .then((response) => {
-=======
+    // QueryResultResource.get({ id: this.job.query_result_id })
+    //   .then((response) => {
     QueryResultResource.get({ id: this.job.query_result_id, partial: first })
-      .then(response => {
->>>>>>> 499216e92 (Reapply changes from PR https://github.com/orchestrated-io/redash/pull/2)
+      .then((response) => {
         this.update(response);
         this.isLoadingResult = false;
       })
@@ -435,18 +427,21 @@ class QueryResult {
           });
           this.isLoadingResult = false;
         } else {
-<<<<<<< HEAD
-          setTimeout(
-            () => {
-              this.loadResult(tryCount + 1);
-            },
-            1000 * Math.pow(2, tryCount)
-          );
-=======
+          // setTimeout(
+          //   () => {
+          //     this.loadResult(tryCount + 1);
+          //   },
+          //   1000 * Math.pow(2, tryCount)
+          // );
           setTimeout(() => {
             this.loadResult(tryCount + 1, false);
           }, 1000 * Math.pow(2, tryCount));
->>>>>>> 499216e92 (Reapply changes from PR https://github.com/orchestrated-io/redash/pull/2)
+          setTimeout(
+            () => {
+              this.loadResult(tryCount + 1, false);
+            },
+            1000 * Math.pow(2, tryCount)
+          );
         }
       });
   }
