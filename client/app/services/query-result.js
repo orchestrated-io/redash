@@ -8,12 +8,19 @@ import { isString, uniqBy, each, isNumber, includes, extend, forOwn, get } from 
 const logger = debug("redash:services:QueryResult");
 const filterTypes = ["filter", "multi-filter", "multiFilter"];
 
-function defer() {
-  const result = { onStatusChange: status => {} };
-  result.promise = new Promise((resolve, reject) => {
-    result.resolve = resolve;
-    result.reject = reject;
-  });
+function defer(instance = 0) {
+  const result = { onStatusChange: (status) => {} };
+  if (instance > 0) {
+    result.promise2 = new Promise((resolve, reject) => {
+      result.resolve2 = resolve;
+      result.reject2 = reject;
+    });
+  } else {
+    result.promise = new Promise((resolve, reject) => {
+      result.resolve = resolve;
+      result.reject = reject;
+    });
+  }
   return result;
 }
 
@@ -40,13 +47,13 @@ function getColumnNameWithoutType(column) {
 }
 
 function getColumnFriendlyName(column) {
-  return getColumnNameWithoutType(column).replace(/(?:^|\s)\S/g, a => a.toUpperCase());
+  return getColumnNameWithoutType(column).replace(/(?:^|\s)\S/g, (a) => a.toUpperCase());
 }
 
-const createOrSaveUrl = data => (data.id ? `api/query_results/${data.id}` : "api/query_results");
+const createOrSaveUrl = (data) => (data.id ? `api/query_results/${data.id}` : "api/query_results");
 const QueryResultResource = {
   get: ({ id }) => axios.get(`api/query_results/${id}`),
-  post: data => axios.post(createOrSaveUrl(data), data),
+  post: (data) => axios.post(createOrSaveUrl(data), data),
 };
 
 export const ExecutionStatus = {
@@ -64,7 +71,7 @@ const statuses = {
   4: ExecutionStatus.FAILED,
 };
 
-function handleErrorResponse(queryResult, error) {
+function handleErrorResponse(queryResult, error, instance = 0) {
   const status = get(error, "response.status");
   switch (status) {
     case 403:
@@ -88,20 +95,23 @@ function handleErrorResponse(queryResult, error) {
   }
 
   logger("Unknown error", error);
-  queryResult.update({
-    job: {
-      error: get(error, "response.data.message", "Unknown error occurred. Please try again later."),
-      status: 4,
+  queryResult.update(
+    {
+      job: {
+        error: get(error, "response.data.message", "Unknown error occurred. Please try again later."),
+        status: 4,
+      },
     },
-  });
+    instance
+  );
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function fetchDataFromJob(jobId, interval = 1000) {
-  return axios.get(`api/jobs/${jobId}`).then(data => {
+  return axios.get(`api/jobs/${jobId}`).then((data) => {
     const status = statuses[data.job.status];
     if (status === ExecutionStatus.WAITING || status === ExecutionStatus.PROCESSING) {
       return sleep(interval).then(() => fetchDataFromJob(data.job.id));
@@ -119,7 +129,8 @@ export function isDateTime(v) {
 
 class QueryResult {
   constructor(props) {
-    this.deferred = defer();
+    this.deferred = defer(0);
+    this.deferred2 = defer(1);
     this.job = {};
     this.query_result = {};
     this.status = "waiting";
@@ -134,19 +145,19 @@ class QueryResult {
     }
   }
 
-  update(props) {
+  update(props, instance = 0) {
     extend(this, props);
 
     if ("query_result" in props) {
       this.status = ExecutionStatus.DONE;
-      this.deferred.onStatusChange(ExecutionStatus.DONE);
+      (instance > 0 ? this.deferred : this.deferred2).onStatusChange(ExecutionStatus.DONE);
 
       const columnTypes = {};
 
       // TODO: we should stop manipulating incoming data, and switch to relaying
       // on the column type set by the backend. This logic is prone to errors,
       // and better be removed. Kept for now, for backward compatability.
-      each(this.query_result.data.rows, row => {
+      each(this.query_result.data.rows, (row) => {
         forOwn(row, (v, k) => {
           let newType = null;
           if (isNumber(v)) {
@@ -173,7 +184,7 @@ class QueryResult {
         });
       });
 
-      each(this.query_result.data.columns, column => {
+      each(this.query_result.data.columns, (column) => {
         column.name = "" + column.name;
         if (columnTypes[column.name]) {
           if (column.type == null || column.type === "string") {
@@ -182,15 +193,15 @@ class QueryResult {
         }
       });
 
-      this.deferred.resolve(this);
+      instance > 0 ? this.deferred2.resolve2(this) : this.deferred.resolve(this);
     } else if (this.job.status === 3 || this.job.status === 2) {
-      this.deferred.onStatusChange(ExecutionStatus.PROCESSING);
+      (instance > 0 ? this.deferred2 : this.deferred).onStatusChange(ExecutionStatus.PROCESSING);
       this.status = "processing";
     } else if (this.job.status === 4) {
       this.status = statuses[this.job.status];
-      this.deferred.reject(new QueryResultError(this.job.error));
+      (instance > 0 ? this.deferred2.reject2 : this.deferred.reject)(new QueryResultError(this.job.error));
     } else {
-      this.deferred.onStatusChange(undefined);
+      (instance > 0 ? this.deferred2 : this.deferred).onStatusChange(undefined);
       this.status = undefined;
     }
   }
@@ -265,14 +276,14 @@ class QueryResult {
 
   getColumnNames() {
     if (this.columnNames === undefined && this.query_result.data) {
-      this.columnNames = this.query_result.data.columns.map(v => v.name);
+      this.columnNames = this.query_result.data.columns.map((v) => v.name);
     }
 
     return this.columnNames;
   }
 
   getColumnFriendlyNames() {
-    return this.getColumnNames().map(col => getColumnFriendlyName(col));
+    return this.getColumnNames().map((col) => getColumnFriendlyName(col));
   }
 
   getTruncated() {
@@ -286,7 +297,7 @@ class QueryResult {
 
     const filters = [];
 
-    this.getColumns().forEach(col => {
+    this.getColumns().forEach((col) => {
       const name = col.name;
       const type = name.split("::")[1] || name.split("__")[1];
       if (includes(filterTypes, type)) {
@@ -302,8 +313,8 @@ class QueryResult {
       }
     }, this);
 
-    this.getRawData().forEach(row => {
-      filters.forEach(filter => {
+    this.getRawData().forEach((row) => {
+      filters.forEach((filter) => {
         filter.values.push(row[filter.name]);
         if (filter.values.length === 1) {
           if (filter.multiple) {
@@ -315,8 +326,8 @@ class QueryResult {
       });
     });
 
-    filters.forEach(filter => {
-      filter.values = uniqBy(filter.values, v => {
+    filters.forEach((filter) => {
+      filter.values = uniqBy(filter.values, (v) => {
         if (moment.isMoment(v)) {
           return v.unix();
         }
@@ -334,26 +345,39 @@ class QueryResult {
     if (statusCallback) {
       this.deferred.onStatusChange = statusCallback;
     }
-    return this.deferred.promise;
+    return [this.deferred.promise, this.deferred2.promise2];
   }
 
-  static getById(queryId, id) {
+  static getById(queryId, id, partial = false) {
     const queryResult = new QueryResult();
 
     queryResult.isLoadingResult = true;
     queryResult.deferred.onStatusChange(ExecutionStatus.LOADING_RESULT);
 
     axios
-      .get(`api/queries/${queryId}/results/${id}.json`)
-      .then(response => {
+      .get(`api/queries/${queryId}/results/${id}.json?partial=${partial}`)
+      .then((response) => {
         // Success handler
         queryResult.isLoadingResult = false;
-        queryResult.update(response);
+        queryResult.update(response, 0);
+
+        axios
+          .get(`api/queries/${queryId}/results/${id}.json?partial=false`)
+          .then((response) => {
+            // Success handler
+            queryResult.isLoadingResult = false;
+            queryResult.update(response, 1);
+          })
+          .catch((error) => {
+            // Error handler
+            queryResult.isLoadingResult = false;
+            handleErrorResponse(queryResult, error, 1);
+          });
       })
-      .catch(error => {
+      .catch((error) => {
         // Error handler
         queryResult.isLoadingResult = false;
-        handleErrorResponse(queryResult, error);
+        handleErrorResponse(queryResult, error, 0);
       });
 
     return queryResult;
@@ -362,24 +386,24 @@ class QueryResult {
   loadLatestCachedResult(queryId, parameters) {
     axios
       .post(`api/queries/${queryId}/results`, { queryId, parameters })
-      .then(response => {
+      .then((response) => {
         this.update(response);
       })
-      .catch(error => {
+      .catch((error) => {
         handleErrorResponse(this, error);
       });
   }
 
-  loadResult(tryCount) {
+  loadResult(tryCount, first = true) {
     this.isLoadingResult = true;
     this.deferred.onStatusChange(ExecutionStatus.LOADING_RESULT);
 
-    QueryResultResource.get({ id: this.job.query_result_id })
-      .then(response => {
+    QueryResultResource.get({ id: this.job.query_result_id, partial: first })
+      .then((response) => {
         this.update(response);
         this.isLoadingResult = false;
       })
-      .catch(error => {
+      .catch((error) => {
         if (tryCount === undefined) {
           tryCount = 0;
         }
@@ -394,9 +418,12 @@ class QueryResult {
           });
           this.isLoadingResult = false;
         } else {
-          setTimeout(() => {
-            this.loadResult(tryCount + 1);
-          }, 1000 * Math.pow(2, tryCount));
+          setTimeout(
+            () => {
+              this.loadResult(tryCount + 1, false);
+            },
+            1000 * Math.pow(2, tryCount)
+          );
         }
       });
   }
@@ -410,7 +437,7 @@ class QueryResult {
       : axios.get(`api/queries/${query}/jobs/${this.job.id}`);
 
     request
-      .then(jobResponse => {
+      .then((jobResponse) => {
         this.update(jobResponse);
 
         if (this.getStatus() === "processing" && this.job.query_result_id && this.job.query_result_id !== "None") {
@@ -422,7 +449,7 @@ class QueryResult {
           }, waitTime);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         logger("Connection error", error);
         // TODO: use QueryResultError, or better yet: exception/reject of promise.
         this.update({
@@ -451,14 +478,14 @@ class QueryResult {
 
     axios
       .post(`api/queries/${id}/results`, { id, parameters, apply_auto_limit: applyAutoLimit, max_age: maxAge })
-      .then(response => {
+      .then((response) => {
         queryResult.update(response);
 
         if ("job" in response) {
           queryResult.refreshStatus(id, parameters);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         handleErrorResponse(queryResult, error);
       });
 
@@ -481,14 +508,14 @@ class QueryResult {
     }
 
     QueryResultResource.post(params)
-      .then(response => {
+      .then((response) => {
         queryResult.update(response);
 
         if ("job" in response) {
           queryResult.refreshStatus(query, parameters);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         handleErrorResponse(queryResult, error);
       });
 

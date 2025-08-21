@@ -54,6 +54,7 @@ function QueryView(props) {
   const {
     queryResult,
     loadedInitialResults,
+    loadedFullResults,
     isExecuting,
     executionStatus,
     executeQuery,
@@ -71,7 +72,7 @@ function QueryView(props) {
     setQuery(newQuery);
     setSelectedVisualization(visualization.id);
   });
-  const editVisualization = useEditVisualizationDialog(query, queryResult, newQuery => setQuery(newQuery));
+  const editVisualization = useEditVisualizationDialog(query, queryResult, (newQuery) => setQuery(newQuery));
   const deleteVisualization = useDeleteVisualization(query, setQuery);
 
   const doExecuteQuery = useCallback(
@@ -97,7 +98,8 @@ function QueryView(props) {
       className={cx("query-page-wrapper", {
         "query-view-fullscreen": fullscreen,
         "query-fixed-layout": isFixedLayout,
-      })}>
+      })}
+    >
       <div className="container w-100">
         <QueryPageHeader
           query={query}
@@ -112,7 +114,8 @@ function QueryView(props) {
                   type="primary"
                   shortcut="mod+enter, alt+enter, ctrl+enter"
                   disabled={!queryFlags.canExecute || isExecuting || areParametersDirty}
-                  onClick={doExecuteQuery}>
+                  onClick={doExecuteQuery}
+                >
                   Refresh
                 </QueryViewButton>
               )}
@@ -177,7 +180,8 @@ function QueryView(props) {
                     type="primary"
                     disabled={!queryFlags.canExecute || areParametersDirty}
                     loading={isExecuting}
-                    onClick={doExecuteQuery}>
+                    onClick={doExecuteQuery}
+                  >
                     {!isExecuting && <i className="zmdi zmdi-refresh m-r-5" aria-hidden="true" />}
                     Refresh Now
                   </Button>
@@ -185,6 +189,9 @@ function QueryView(props) {
               }
               canRefresh={policy.canRun(query)}
             />
+          )}
+          {loadedInitialResults && !loadedFullResults && (
+            <div style={{ color: "orange", textAlign: "center" }}>Still loading more results...</div>
           )}
           <div className="query-results-footer">
             {queryResult && !queryResult.getError() && (
@@ -201,7 +208,8 @@ function QueryView(props) {
                     title="Toggle Fullscreen"
                     type="default"
                     shortcut="alt+f"
-                    onClick={toggleFullscreen}>
+                    onClick={toggleFullscreen}
+                  >
                     {fullscreen ? <FullscreenExitOutlinedIcon /> : <FullscreenOutlinedIcon />}
                   </QueryViewButton>
                 }
@@ -236,6 +244,6 @@ routes.register(
   "Queries.View",
   routeWithUserSession({
     path: "/queries/:queryId",
-    render: pageProps => <QueryViewPage {...pageProps} />,
+    render: (pageProps) => <QueryViewPage {...pageProps} />,
   })
 );
