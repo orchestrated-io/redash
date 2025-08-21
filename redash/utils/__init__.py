@@ -125,7 +125,7 @@ def json_dumps(data, *args, **kwargs):
     json.dumps function."""
     kwargs.setdefault("cls", JSONEncoder)
     kwargs.setdefault("ensure_ascii", False)
-    kwargs.setdefault("encoding", None)
+    # kwargs.setdefault("encoding", None)
     kwargs.setdefault("sort_keys", False)
     kwargs.setdefault("indent", None)
     kwargs.setdefault("separators", (",", ":"))
