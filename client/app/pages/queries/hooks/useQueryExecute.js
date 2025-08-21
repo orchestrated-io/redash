@@ -62,7 +62,7 @@ export default function useQueryExecute(query) {
       },
     });
 
-    const onStatusChange = status => {
+    const onStatusChange = (status) => {
       if (queryResultInExecution.current === newQueryResult) {
         setExecutionState({ updatedAt: newQueryResult.getUpdatedAt(), executionStatus: status });
       }
@@ -92,7 +92,7 @@ export default function useQueryExecute(query) {
       }
     };
 
-    const errorResult = queryResult => {
+    const errorResult = (queryResult) => {
       if (queryResultInExecution.current === newQueryResult) {
         if (executionState.loadedInitialResults) {
           notifications.showNotification("Redash", `${query.name} failed to run: ${queryResult.getError()}`);
@@ -111,9 +111,9 @@ export default function useQueryExecute(query) {
     };
 
     const promises = newQueryResult.toPromise(onStatusChange);
-    promises[0].then(queryResult => successResult(queryResult, 0)).catch(queryResult => errorResult(queryResult));
+    promises[0].then((queryResult) => successResult(queryResult, 0)).catch((queryResult) => errorResult(queryResult));
     if (promises[1]) {
-      promises[1].then(queryResult => successResult(queryResult, 1)).catch(queryResult => errorResult(queryResult));
+      promises[1].then((queryResult) => successResult(queryResult, 1)).catch((queryResult) => errorResult(queryResult));
     }
   });
 

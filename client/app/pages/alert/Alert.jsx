@@ -77,7 +77,7 @@ class Alert extends React.Component {
     } else {
       const { alertId } = this.props;
       AlertService.get({ id: alertId })
-        .then(alert => {
+        .then((alert) => {
           if (this._isMounted) {
             const canEdit = currentUser.canEdit(alert);
 
@@ -95,7 +95,7 @@ class Alert extends React.Component {
             this.onQuerySelected(alert.query);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           if (this._isMounted) {
             this.props.onError(error);
           }
@@ -114,7 +114,7 @@ class Alert extends React.Component {
     alert.rearm = pendingRearm || null;
 
     return AlertService.save(alert)
-      .then(alert => {
+      .then((alert) => {
         notification.success("Saved.");
         navigateTo(`alerts/${alert.id}`, true);
         this.setState({ alert, mode: MODES.VIEW });
@@ -124,7 +124,7 @@ class Alert extends React.Component {
       });
   };
 
-  handleResult = queryResult => {
+  handleResult = (queryResult) => {
     if (this._isMounted) {
       this.setState({ queryResult });
       let { column } = this.state.alert.options;
@@ -138,7 +138,7 @@ class Alert extends React.Component {
     }
   };
 
-  onQuerySelected = query => {
+  onQuerySelected = (query) => {
     this.setState(({ alert }) => ({
       alert: Object.assign(alert, { query }),
       queryResult: null,
@@ -147,23 +147,23 @@ class Alert extends React.Component {
     if (query) {
       // get cached result for column names and values
       const promises = new QueryService(query).getQueryResultPromises();
-      promises[0].then(queryResult => this.handleResult(queryResult));
-      promises[1].then(queryResult => this.handleResult(queryResult));
+      promises[0].then((queryResult) => this.handleResult(queryResult));
+      promises[1].then((queryResult) => this.handleResult(queryResult));
     }
   };
 
-  onNameChange = name => {
+  onNameChange = (name) => {
     const { alert } = this.state;
     this.setState({
       alert: Object.assign(alert, { name }),
     });
   };
 
-  onRearmChange = pendingRearm => {
+  onRearmChange = (pendingRearm) => {
     this.setState({ pendingRearm });
   };
 
-  setAlertOptions = obj => {
+  setAlertOptions = (obj) => {
     const { alert } = this.state;
     const options = { ...alert.options, ...obj };
     this.setState({
@@ -282,7 +282,7 @@ routes.register(
   routeWithUserSession({
     path: "/alerts/new",
     title: "New Alert",
-    render: pageProps => <Alert {...pageProps} mode={MODES.NEW} />,
+    render: (pageProps) => <Alert {...pageProps} mode={MODES.NEW} />,
   })
 );
 routes.register(
@@ -290,7 +290,7 @@ routes.register(
   routeWithUserSession({
     path: "/alerts/:alertId",
     title: "Alert",
-    render: pageProps => <Alert {...pageProps} mode={MODES.VIEW} />,
+    render: (pageProps) => <Alert {...pageProps} mode={MODES.VIEW} />,
   })
 );
 routes.register(
@@ -298,6 +298,6 @@ routes.register(
   routeWithUserSession({
     path: "/alerts/:alertId/edit",
     title: "Alert",
-    render: pageProps => <Alert {...pageProps} mode={MODES.EDIT} />,
+    render: (pageProps) => <Alert {...pageProps} mode={MODES.EDIT} />,
   })
 );
