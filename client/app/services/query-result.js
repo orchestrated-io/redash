@@ -95,12 +95,15 @@ function handleErrorResponse(queryResult, error, instance = 0) {
   }
 
   logger("Unknown error", error);
-  queryResult.update({
-    job: {
-      error: get(error, "response.data.message", "Unknown error occurred. Please try again later."),
-      status: 4,
+  queryResult.update(
+    {
+      job: {
+        error: get(error, "response.data.message", "Unknown error occurred. Please try again later."),
+        status: 4,
+      },
     },
-  }, instance);
+    instance
+  );
 }
 
 function sleep(ms) {

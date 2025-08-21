@@ -90,7 +90,7 @@ export default function useQueryExecute(query) {
           executionStatus: null,
         });
       }
-    }
+    };
 
     const errorResult = queryResult => {
       if (queryResultInExecution.current === newQueryResult) {
@@ -108,7 +108,7 @@ export default function useQueryExecute(query) {
           executionStatus: ExecutionStatus.FAILED,
         });
       }
-    }
+    };
 
     const promises = newQueryResult.toPromise(onStatusChange);
     promises[0].then(queryResult => successResult(queryResult, 0)).catch(queryResult => errorResult(queryResult));
