@@ -135,7 +135,7 @@ requests-aws-sign = "0.1.5"
 # TODO: https://github.com/cloudera/python-sasl/pull/31 - outstanding PR to be merged
 sasl = {git = "https://github.com/gughy8/python-sasl.git#master"}
 simple-salesforce = "0.74.3"
-snowflake-connector-python = "3.12.3"
+snowflake-connector-python = "3.17.2"
 td-client = "1.0.0"
 thrift = ">=0.8.0"
 thrift-sasl = ">=0.1.0"
