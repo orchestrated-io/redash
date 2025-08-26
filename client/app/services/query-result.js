@@ -8,13 +8,6 @@ import { isString, uniqBy, each, isNumber, includes, extend, forOwn, get } from 
 const logger = debug("redash:services:QueryResult");
 const filterTypes = ["filter", "multi-filter", "multiFilter"];
 
-// function defer() {
-//   const result = { onStatusChange: (status) => {} };
-//   result.promise = new Promise((resolve, reject) => {
-//     result.resolve = resolve;
-//     result.reject = reject;
-//   });
-
 function defer(instance = 0) {
   const result = { onStatusChange: (status) => {} };
   if (instance > 0) {
@@ -405,8 +398,6 @@ class QueryResult {
     this.isLoadingResult = true;
     this.deferred.onStatusChange(ExecutionStatus.LOADING_RESULT);
 
-    // QueryResultResource.get({ id: this.job.query_result_id })
-    //   .then((response) => {
     QueryResultResource.get({ id: this.job.query_result_id, partial: first })
       .then((response) => {
         this.update(response);
@@ -427,21 +418,9 @@ class QueryResult {
           });
           this.isLoadingResult = false;
         } else {
-          // setTimeout(
-          //   () => {
-          //     this.loadResult(tryCount + 1);
-          //   },
-          //   1000 * Math.pow(2, tryCount)
-          // );
           setTimeout(() => {
             this.loadResult(tryCount + 1, false);
           }, 1000 * Math.pow(2, tryCount));
-          setTimeout(
-            () => {
-              this.loadResult(tryCount + 1, false);
-            },
-            1000 * Math.pow(2, tryCount)
-          );
         }
       });
   }
