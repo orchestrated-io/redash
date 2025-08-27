@@ -2,8 +2,28 @@ import json
 import os
 
 from flask import url_for
+from redash import settings
 
-WEBPACK_MANIFEST_PATH = os.path.join(os.path.dirname(__file__), "../../client/dist/", "asset-manifest.json")
+# Use the same robust path resolution as settings
+def get_project_root():
+    # Try to get the project root from the handler file location
+    handler_dir = os.path.dirname(__file__)
+    project_root_from_handler = os.path.dirname(os.path.dirname(handler_dir))
+    
+    # Also try the current working directory as a fallback
+    current_dir = os.getcwd()
+    
+    # Check which path actually contains the client directory
+    if os.path.exists(os.path.join(project_root_from_handler, "client")):
+        return project_root_from_handler
+    elif os.path.exists(os.path.join(current_dir, "client")):
+        return current_dir
+    else:
+        # Fallback to the handler-based path
+        return project_root_from_handler
+
+project_root = get_project_root()
+WEBPACK_MANIFEST_PATH = os.path.join(project_root, "client", "dist", "asset-manifest.json")
 
 
 def configure_webpack(app):

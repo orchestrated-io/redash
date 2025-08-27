@@ -1,7 +1,7 @@
 import { isString, isObject, filter, sortBy } from "lodash";
 import React from "react";
 import { Context, Route as UniversalRouterRoute } from "universal-router";
-import pathToRegexp from "path-to-regexp";
+import { parse as pathToRegexpParse } from "path-to-regexp";
 
 export interface CurrentRoute<P> {
   id: string | null;
@@ -23,7 +23,7 @@ interface RouteItem extends RedashRoute<any> {
 }
 
 function getRouteParamsCount(path: string) {
-  const tokens = pathToRegexp.parse(path);
+  const tokens = pathToRegexpParse(path);
   return filter(tokens, isObject).length;
 }
 
