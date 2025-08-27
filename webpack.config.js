@@ -3,7 +3,7 @@
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const WebpackBuildNotifierPlugin = require("webpack-build-notifier");
-const ManifestPlugin = require("webpack-manifest-plugin");
+const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const LessPluginAutoPrefix = require("less-plugin-autoprefix");
@@ -63,8 +63,15 @@ function maybeApplyOverrides(config) {
 
 const config = {
   mode: isProduction ? "production" : "development",
+  experiments: {
+    // Enable top-level await and other modern features
+    topLevelAwait: true
+  },
+
   entry: {
     app: [
+      "buffer",
+      "process/browser",
       "./client/app/index.js",
       "./client/app/assets/less/main.less",
       "./client/app/assets/less/ant.less"
@@ -76,22 +83,38 @@ const config = {
     filename: isProduction ? "[name].[chunkhash].js" : "[name].js",
     publicPath: staticPath
   },
-  node: {
-    fs: "empty",
-    path: "empty"
-  },
   resolve: {
     symlinks: false,
     extensions: [".js", ".jsx", ".ts", ".tsx"],
     alias: {
       "@": appPath,
       extensions: extensionPath
+    },
+    fallback: {
+      fs: false,
+      path: false,
+      url: require.resolve("url/"),
+      util: require.resolve("util/"),
+      stream: require.resolve("stream-browserify"),
+      assert: require.resolve("assert/"),
+      buffer: require.resolve("buffer/"),
+      process: require.resolve("process/browser")
+    },
+    // Fix ESM module resolution issues
+    extensionAlias: {
+      ".js": [".js", ".jsx"],
+      ".ts": [".ts", ".tsx"]
     }
   },
   plugins: [
     new WebpackBuildNotifierPlugin({ title: "Redash" }),
     // bundle only default `moment` locale (`en`)
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),
+    // Provide polyfills for Node.js core modules
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+      process: 'process/browser'
+    }),
     // new ESLintPlugin({
     //   context: path.join(__dirname, "client"),
     //   extensions: ["js", "jsx", "ts", "tsx"],
@@ -119,7 +142,7 @@ const config = {
       new MiniCssExtractPlugin({
         filename: "[name].[chunkhash].css"
       }),
-    new ManifestPlugin({
+    new WebpackManifestPlugin({
       fileName: "asset-manifest.json",
       publicPath: ""
     }),
@@ -128,21 +151,28 @@ const config = {
         { from: "client/app/assets/robots.txt" },
         { from: "client/app/unsupported.html" },
         { from: "client/app/unsupportedRedirect.js" },
-        { from: "client/app/assets/css/*.css", to: "styles/", flatten: true },
-        { from: "client/app/assets/fonts", to: "fonts/" }
+        { from: "client/app/assets/css/*.css", to: "styles/", noErrorOnMissing: true },
+        { from: "client/app/assets/fonts", to: "fonts/" },
+        { from: "client/app/assets/images", to: "images/" }
       ],
     }),
-    isHotReloadingEnabled && new ReactRefreshWebpackPlugin({ overlay: false })
+    isHotReloadingEnabled && new ReactRefreshWebpackPlugin()
   ].filter(Boolean),
   optimization: {
     splitChunks: {
       chunks: chunk => {
-        return chunk.name != "server";
+        return chunk.name !== "server";
       }
     }
   },
   module: {
     rules: [
+      {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false
+        }
+      },
       {
         test: /\.js$/,
         enforce: "pre",
@@ -204,45 +234,33 @@ const config = {
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              context: path.resolve(appPath, "./assets/images/"),
-              outputPath: "images/",
-              name: "[path][name].[ext]"
-            }
-          }
-        ]
+        type: "asset/resource",
+        generator: {
+          filename: "images/[path][name].[ext]"
+        }
       },
       {
         test: /\.geo\.json$/,
-        type: "javascript/auto",
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              outputPath: "data/",
-              name: "[hash:7].[name].[ext]"
-            }
-          }
-        ]
+        type: "asset/resource",
+        generator: {
+          filename: "data/[hash:7].[name].[ext]"
+        }
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        use: [
-          {
-            loader: "url-loader",
-            options: {
-              limit: 10000,
-              name: "fonts/[name].[hash:7].[ext]"
-            }
+        type: "asset",
+        parser: {
+          dataUrlCondition: {
+            maxSize: 10000
           }
-        ]
+        },
+        generator: {
+          filename: "fonts/[name].[hash:7].[ext]"
+        }
       }
     ]
   },
-  devtool: isProduction ? "source-map" : "cheap-eval-module-source-map",
+  devtool: isProduction ? "source-map" : "eval-cheap-module-source-map",
   stats: {
     children: false,
     modules: false,
@@ -252,13 +270,15 @@ const config = {
     ignored: /\.sw.$/
   },
   devServer: {
+    static: {
+      directory: path.join(__dirname, "client/dist"),
+      publicPath: staticPath
+    },
     devMiddleware: {
-      index: "/static/index.html",
-      publicPath: staticPath,
       stats: {
         modules: false,
         chunkModules: false
-      },
+      }
     },
     historyApiFallback: {
       index: "/static/index.html",
