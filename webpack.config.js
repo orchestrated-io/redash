@@ -11,6 +11,7 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
+
 const path = require("path");
 
 function optionalRequire(module, defaultReturn = undefined) {
@@ -91,6 +92,15 @@ const config = {
     new WebpackBuildNotifierPlugin({ title: "Redash" }),
     // bundle only default `moment` locale (`en`)
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),
+    // new ESLintPlugin({
+    //   context: path.join(__dirname, "client"),
+    //   extensions: ["js", "jsx", "ts", "tsx"],
+    //   // files: "**/*.{js,jsx,ts,tsx}",
+    //   exclude: ["dist"],
+    //   failOnError: false,
+    //   failOnWarning: false,
+    //   lintDirtyModulesOnly: true
+    // }),
     new HtmlWebpackPlugin({
       template: "./client/app/index.html",
       filename: "index.html",
@@ -149,8 +159,7 @@ const config = {
                 isHotReloadingEnabled && require.resolve("react-refresh/babel")
               ].filter(Boolean)
             }
-          },
-          require.resolve("eslint-loader")
+          }
         ]
       },
       {
