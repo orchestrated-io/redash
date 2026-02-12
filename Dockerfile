@@ -44,8 +44,9 @@ EXPOSE 5000
 
 RUN useradd --create-home redash
 
-# Ubuntu packages
+# Update base packages and install required packages
 RUN apt-get update && \
+  apt-get upgrade -y && \
   apt-get install -y --no-install-recommends \
   pkg-config \
   curl \
@@ -96,7 +97,7 @@ EOF
 
 WORKDIR /app
 
-ENV POETRY_VERSION=1.8.3
+ENV POETRY_VERSION=2.1.4
 ENV POETRY_HOME=/etc/poetry
 ENV POETRY_VIRTUALENVS_CREATE=false
 ENV PIP_PREFER_BINARY=1
