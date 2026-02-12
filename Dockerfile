@@ -103,6 +103,9 @@ ENV POETRY_VIRTUALENVS_CREATE=false
 ENV PIP_PREFER_BINARY=1
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
+# Ensure setuptools is available for legacy packages that need pkg_resources during build
+RUN pip install --no-cache-dir setuptools
+
 # Use BuildKit cache mount for Poetry cache to speed up builds
 COPY pyproject.toml poetry.lock ./
 
