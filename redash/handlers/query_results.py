@@ -1,3 +1,4 @@
+import logging
 import unicodedata
 from urllib.parse import quote
 
@@ -35,6 +36,8 @@ from redash.utils import (
     json_dumps,
     to_filename,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def error_response(message, http_status=400):
@@ -124,19 +127,25 @@ def get_download_filename(query_result, query, filetype):
 
 
 def content_disposition_filenames(attachment_filename):
+    logger.info(
+        f"content_disposition_filenames called with: {attachment_filename} (type: {type(attachment_filename)})"
+    )
     if not isinstance(attachment_filename, str):
         attachment_filename = attachment_filename.decode("utf-8")
 
     try:
-        attachment_filename = attachment_filename.encode("ascii")
+        # Test if we can encode as ASCII, but don't actually encode
+        attachment_filename.encode("ascii")
+        # If we can encode as ASCII, use the original string
+        filenames = {"filename": attachment_filename}
     except UnicodeEncodeError:
+        # If we can't encode as ASCII, provide both filename and filename* for RFC 6266 compliance
         filenames = {
-            "filename": unicodedata.normalize("NFKD", attachment_filename).encode("ascii", "ignore"),
+            "filename": unicodedata.normalize("NFKD", attachment_filename).encode("ascii", "ignore").decode("ascii"),
             "filename*": "UTF-8''%s" % quote(attachment_filename, safe=b""),
         }
-    else:
-        filenames = {"filename": attachment_filename}
 
+    logger.info(f"content_disposition_filenames returning: {filenames}")
     return filenames
 
 
