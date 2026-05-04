@@ -1,4 +1,4 @@
-FROM node:24-bookworm AS frontend-builder
+FROM node:24-trixie AS frontend-builder
 
 RUN npm install --global pnpm@10.30.3
 
@@ -39,7 +39,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/frontend/.cache/pnpm,uid=1001,gid=1
   fi
 EOF
 
-FROM python:3.13-slim-bookworm
+FROM python:3.13-slim-trixie
 
 EXPOSE 5000
 
