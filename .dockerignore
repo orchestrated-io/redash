@@ -1,5 +1,7 @@
 client/.tmp/
+# Never ship JS dependency trees in the Python runtime image (SBOM / Scout).
 node_modules/
+**/node_modules/
 viz-lib/node_modules/
 .tmp/
 .venv/

@@ -45,8 +45,9 @@ EXPOSE 5000
 
 RUN useradd --create-home redash
 
-# Ubuntu packages
+# Ubuntu packages (upgrade first for glibc/gnutls/nghttp2 security fixes on the base image)
 RUN apt-get update && \
+  apt-get upgrade -y --no-install-recommends && \
   apt-get install -y --no-install-recommends \
   pkg-config \
   curl \
@@ -97,7 +98,7 @@ EOF
 
 WORKDIR /app
 
-ENV POETRY_VERSION=2.1.4
+ENV POETRY_VERSION=2.3.3
 ENV POETRY_HOME=/etc/poetry
 ENV POETRY_VIRTUALENVS_CREATE=false
 RUN curl -sSL --retry 3 --retry-delay 5 https://install.python-poetry.org | python3 -
@@ -115,7 +116,9 @@ RUN /etc/poetry/bin/poetry install --only $install_groups $POETRY_OPTIONS
 
 COPY --chown=redash . /app
 COPY --from=frontend-builder --chown=redash /frontend/client/dist /app/client/dist
-RUN chown redash /app
+# Build contexts sometimes still contain node_modules; the server does not run Node.
+RUN find /app -depth -type d -name node_modules -exec rm -rf {} + 2>/dev/null || true \
+    && chown redash /app
 USER redash
 
 ENTRYPOINT ["/app/bin/docker-entrypoint"]
