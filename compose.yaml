@@ -1,12 +1,18 @@
 # This configuration file is for the **development** setup.
 # For a production example please refer to getredash/setup repository on GitHub.
+#
+# Bind-mount `.:/app` replaces the whole tree, including `client/dist` (gitignored). The image
+# must build the frontend, and `/app/client/dist` is kept on an anonymous volume so the bind
+# mount does not hide built assets (otherwise `/static/server.css` etc. return 404). To iterate
+# on the UI from the host, run `yarn build`, remove the `client/dist` volume line, or rebuild.
 x-redash-service: &redash-service
   build:
     context: .
     args:
-      skip_frontend_build: "true"  # set to empty string to build
+      skip_frontend_build: "true" # set to empty string to build
   volumes:
     - .:/app
+    # - /app/client/dist
   env_file:
     - .env
 x-redash-environment: &redash-environment

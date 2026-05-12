@@ -68,11 +68,18 @@ const config = {
       "./client/app/assets/less/main.less",
       "./client/app/assets/less/ant.less"
     ],
-    server: ["./client/app/assets/less/server.less"]
+    server: ["./client/app/assets/less/server.less"],
+    // Fixed filename for server-rendered login.html (SAML console diagnostics).
+    samlBrowserDebug: "./client/app/saml-browser-debug.entry.js"
   },
   output: {
     path: path.join(basePath, "./dist"),
-    filename: isProduction ? "[name].[chunkhash].js" : "[name].js",
+    filename: pathData => {
+      if (pathData.chunk.name === "samlBrowserDebug") {
+        return "saml-browser-debug.js";
+      }
+      return isProduction ? "[name].[chunkhash].js" : "[name].js";
+    },
     publicPath: staticPath
   },
   node: {
@@ -100,7 +107,7 @@ const config = {
     new HtmlWebpackPlugin({
       template: "./client/app/index.html",
       filename: "index.html",
-      excludeChunks: ["server"],
+      excludeChunks: ["server", "samlBrowserDebug"],
       release: process.env.BUILD_VERSION || "dev",
       staticPath,
       baseHref,
@@ -109,7 +116,7 @@ const config = {
     new HtmlWebpackPlugin({
       template: "./client/app/multi_org.html",
       filename: "multi_org.html",
-      excludeChunks: ["server"]
+      excludeChunks: ["server", "samlBrowserDebug"]
     }),
     isProduction &&
       new MiniCssExtractPlugin({
@@ -139,6 +146,10 @@ const config = {
   optimization: {
     splitChunks: {
       chunks: chunk => {
+        // Keep SAML login diagnostics in one file (login.html loads only saml-browser-debug.js).
+        if (chunk.name === "samlBrowserDebug") {
+          return false;
+        }
         return chunk.name != "server";
       }
     }
