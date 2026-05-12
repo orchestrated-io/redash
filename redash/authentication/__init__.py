@@ -272,6 +272,7 @@ def create_and_login_user(org, name, email, picture=None):
     try:
         user_object = models.User.get_by_email_and_org(email, org)
         if user_object.is_disabled:
+            logger.warning("User is disabled (%r)", email)
             return None
         if user_object.is_invitation_pending:
             user_object.is_invitation_pending = False
