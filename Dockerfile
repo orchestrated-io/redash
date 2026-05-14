@@ -4,6 +4,7 @@ RUN npm install --global --force yarn@1.22.22
 
 # Controls whether to build the frontend assets
 ARG skip_frontend_build
+ENV SKIP_FRONTEND_BUILD=${skip_frontend_build}
 
 ENV CYPRESS_INSTALL_BINARY=0
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
@@ -24,19 +25,24 @@ ENV BABEL_ENV=${code_coverage:+test}
 # Avoid issues caused by lags in disk and network I/O speeds when working on top of QEMU emulation for multi-platform image building.
 RUN yarn config set network-timeout 300000
 
-RUN if [ "x$skip_frontend_build" = "x" ] ; then yarn --frozen-lockfile --network-concurrency 1; fi
+RUN if [ -z "${SKIP_FRONTEND_BUILD:-}" ] ; then yarn --frozen-lockfile --network-concurrency 1; fi
 
 COPY --chown=redash client /frontend/client
 COPY --chown=redash webpack.config.js /frontend/
-RUN <<EOF
-  if [ "x$skip_frontend_build" = "x" ]; then
-    yarn build
-  else
-    mkdir -p /frontend/client/dist
-    touch /frontend/client/dist/multi_org.html
-    touch /frontend/client/dist/index.html
-  fi
-EOF
+# Use explicit webpack invocation: some environments resolve `webpack` inconsistently after `yarn build:viz`.
+# `set -ex` surfaces the first failing command (clean, viz, or webpack).
+RUN if [ -n "${SKIP_FRONTEND_BUILD:-}" ]; then \
+      mkdir -p /frontend/client/dist \
+      && touch /frontend/client/dist/multi_org.html \
+      && touch /frontend/client/dist/index.html; \
+    else \
+      set -ex; \
+      yarn clean; \
+      yarn build:viz; \
+      NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production \
+        ./node_modules/.bin/webpack build --config ./webpack.config.js; \
+    fi \
+    && test -f /frontend/client/dist/index.html
 
 FROM python:3.13-slim-trixie
 
