@@ -48,7 +48,7 @@
     "@redash/viz": "file:viz-lib",
     "ace-builds": "^1.43.3",
     "antd": "4.4.3",
-    "axios": "1.15.1",
+    "axios": "1.15.2",
     "axios-auth-refresh": "3.3.6",
     "bootstrap": "^3.4.1",
     "classnames": "^2.2.6",
@@ -188,6 +188,8 @@
     "path": false
   },
   "resolutions": {
+    "axios": "1.15.2",
+    "minimatch": "^10.2.1",
     "execa": "^5.1.1",
     "form-data": "^4.0.5",
     "basic-ftp": "^5.3.0",
