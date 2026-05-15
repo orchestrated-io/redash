@@ -23,9 +23,9 @@ ARG code_coverage
 ENV BABEL_ENV=${code_coverage:+test}
 
 # Avoid issues caused by lags in disk and network I/O speeds when working on top of QEMU emulation for multi-platform image building.
-RUN pnpm config set network-timeout 300000
+RUN yarn config set network-timeout 300000
 
-RUN if [ -z "${SKIP_FRONTEND_BUILD:-}" ] ; then pnpm install --frozen-lockfile; fi
+RUN if [ -z "${SKIP_FRONTEND_BUILD:-}" ] ; then yarn install --frozen-lockfile --network-concurrency 1; fi
 
 COPY --chown=redash client /frontend/client
 COPY --chown=redash webpack.config.js /frontend/
@@ -37,8 +37,8 @@ RUN if [ -n "${SKIP_FRONTEND_BUILD:-}" ]; then \
       && touch /frontend/client/dist/index.html; \
     else \
       set -ex; \
-      pnpm run clean; \
-      pnpm run build:viz; \
+      yarn clean; \
+      yarn build:viz; \
       NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production \
         ./node_modules/.bin/webpack build --config ./webpack.config.js; \
     fi \
