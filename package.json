@@ -7,7 +7,7 @@
     "start": "npm-run-all --parallel watch:viz webpack-dev-server",
     "clean": "node ./scripts/client-dist.js clean",
     "build:viz": "(cd viz-lib && yarn build:babel)",
-    "build": "node ./scripts/client-dist.js check && yarn clean && yarn build:viz && NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production webpack build",
+    "build": "node ./scripts/client-dist.js check && yarn build:viz && NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production webpack build",
     "watch:app": "NODE_OPTIONS=--openssl-legacy-provider webpack watch --progress",
     "watch:viz": "(cd viz-lib && yarn watch:babel)",
     "watch": "npm-run-all --parallel watch:*",
@@ -52,6 +52,7 @@
     "axios-auth-refresh": "3.3.6",
     "bootstrap": "^3.4.1",
     "classnames": "^2.2.6",
+    "core-js": "^2.6.12",
     "d3": "^3.5.17",
     "debug": "^3.2.7",
     "dompurify": "^3.4.0",
@@ -193,6 +194,7 @@
     "picomatch": "^4.0.4",
     "micromatch": "^4.0.8",
     "cookie": "^0.7.2",
+    "core-js": "^2.6.12",
     "execa": "^5.1.1",
     "form-data": "^4.0.5",
     "basic-ftp": "^5.3.0",
@@ -214,7 +216,8 @@
     "ip-address": "^10.1.1",
     "protocol-buffers-schema": "^3.6.1",
     "express/path-to-regexp": "0.1.13",
-    "@percy/agent/express/path-to-regexp": "0.1.13"
+    "@percy/agent/express/path-to-regexp": "0.1.13",
+    "lodash.template": "4.18.1"
   },
   "//": "browserslist set to 'Async functions' compatibility",
   "browserslist": [
