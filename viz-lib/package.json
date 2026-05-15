@@ -125,7 +125,6 @@
     "axios": "1.15.2",
     "minimatch": "^10.2.1",
     "picomatch": "^4.0.4",
-    "postcss": "^8.5.10",
     "micromatch": "^4.0.8",
     "cookie": "^0.7.2",
     "execa": "^5.1.1",
