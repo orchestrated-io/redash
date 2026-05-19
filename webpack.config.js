@@ -133,7 +133,8 @@ const config = {
         { from: "client/app/assets/robots.txt" },
         { from: "client/app/unsupported.html" },
         { from: "client/app/unsupportedRedirect.js" },
-        { from: "client/app/assets/css/*.css", to: "styles/", flatten: true },
+        // copy-webpack-plugin v9+: use [name][ext] instead of removed `flatten`
+        { from: "client/app/assets/css/*.css", to: "styles/[name][ext]" },
         { from: "client/app/assets/fonts", to: "fonts/" }
       ],
     }),
@@ -236,41 +237,29 @@ const config = {
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              context: path.resolve(appPath, "./assets/images/"),
-              outputPath: "images/",
-              name: "[path][name].[ext]"
-            }
-          }
-        ]
+        type: "asset/resource",
+        generator: {
+          filename: "images/[name].[contenthash:8][ext]"
+        }
       },
       {
         test: /\.geo\.json$/,
-        type: "javascript/auto",
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              outputPath: "data/",
-              name: "[hash:7].[name].[ext]"
-            }
-          }
-        ]
+        type: "asset/resource",
+        generator: {
+          filename: "data/[contenthash:7].[name][ext]"
+        }
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        use: [
-          {
-            loader: "url-loader",
-            options: {
-              limit: 10000,
-              name: "fonts/[name].[hash:7].[ext]"
-            }
+        type: "asset",
+        parser: {
+          dataUrlCondition: {
+            maxSize: 10000
           }
-        ]
+        },
+        generator: {
+          filename: "fonts/[name].[contenthash:7][ext]"
+        }
       }
     ]
   },
