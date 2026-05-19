@@ -4,7 +4,6 @@ RUN npm install --global --force yarn@1.22.22
 
 # Controls whether to build the frontend assets
 ARG skip_frontend_build
-ENV SKIP_FRONTEND_BUILD=${skip_frontend_build}
 
 ENV CYPRESS_INSTALL_BINARY=0
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
