@@ -26,9 +26,11 @@ def _saml_http_request_summary():
     return {
         "method": request.method,
         "path": request.path,
-        "query_string": request.query_string.decode("utf-8", errors="replace")[:500]
-        if getattr(request, "query_string", None)
-        else "",
+        "query_string": (
+            request.query_string.decode("utf-8", errors="replace")[:500]
+            if getattr(request, "query_string", None)
+            else ""
+        ),
         "content_type": request.content_type,
         "content_length": request.content_length,
         "remote_addr": request.remote_addr,

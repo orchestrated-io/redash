@@ -13,7 +13,7 @@ maintainers = [
 readme = "README.md"
 
 [tool.black]
-target-version = ['py311']
+target-version = ['py314']
 line-length = 119
 force-exclude = '''
 /(
