@@ -43,7 +43,7 @@ RUN if [ -n "${SKIP_FRONTEND_BUILD:-}" ]; then \
     fi \
     && test -f /frontend/client/dist/index.html
 
-FROM python:3.13-slim-trixie
+FROM python:3.14-slim-trixie
 
 EXPOSE 5000
 
