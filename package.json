@@ -48,7 +48,7 @@
     "@redash/viz": "file:viz-lib",
     "ace-builds": "^1.43.3",
     "antd": "4.4.3",
-    "axios": "1.15.2",
+    "axios": "1.16.0",
     "axios-auth-refresh": "3.3.6",
     "bootstrap": "^3.4.1",
     "classnames": "^2.2.6",
@@ -186,7 +186,7 @@
     "path": false
   },
   "resolutions": {
-    "axios": "1.15.2",
+    "axios": "1.16.0",
     "minimatch": "^10.2.1",
     "picomatch": "^4.0.4",
     "micromatch": "^4.0.8",
@@ -199,7 +199,9 @@
     "flatted": "^3.4.2",
     "follow-redirects": "^1.16.0",
     "lodash": "^4.18.0",
-    "qs": "^6.14.2",
+    "qs": "^6.15.2",
+    "uuid": "^11.1.1",
+    "tmp": "^0.2.6",
     "cross-spawn": "^7.0.5",
     "braces": "^3.0.3",
     "tar": "^7.5.11",
