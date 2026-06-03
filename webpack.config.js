@@ -135,7 +135,13 @@ const config = {
         { from: "client/app/unsupportedRedirect.js" },
         // copy-webpack-plugin v9+: use [name][ext] instead of removed `flatten`
         { from: "client/app/assets/css/*.css", to: "styles/[name][ext]" },
-        { from: "client/app/assets/fonts", to: "fonts/" }
+        { from: "client/app/assets/fonts", to: "fonts/" },
+        // Hard-coded /static/images/<subdir>/… URLs (db-logos, illustrations, etc.) must exist
+        // at stable paths. Webpack's asset/resource rule only emits hashed files under images/.
+        { from: "client/app/assets/images/db-logos", to: "images/db-logos" },
+        { from: "client/app/assets/images/illustrations", to: "images/illustrations" },
+        { from: "client/app/assets/images/fixtures", to: "images/fixtures" },
+        { from: "client/app/assets/images/destinations", to: "images/destinations" },
       ],
     }),
     isHotReloadingEnabled && new ReactRefreshWebpackPlugin({ overlay: false }),

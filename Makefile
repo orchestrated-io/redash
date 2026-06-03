@@ -3,6 +3,12 @@
 compose_build: .env
 	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker compose build
 
+# After `yarn build`, refresh anonymous /app/client/dist volumes on running stacks (legacy).
+# Prefer recreating services after compose.yaml no longer uses a separate dist volume.
+sync_compose_dist: .env
+	yarn build
+	docker compose cp client/dist/. server:/app/client/dist/
+
 up:
 	docker compose up -d redis postgres --remove-orphans
 	docker compose exec -u postgres postgres psql postgres --csv \
