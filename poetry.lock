@@ -2160,18 +2160,18 @@ trio = ["trio (>=0.22.0,<1.0)"]
 
 [[package]]
 name = "httplib2"
-version = "0.19.0"
+version = "0.31.2"
 description = "A comprehensive HTTP client library."
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 groups = ["main", "all-ds"]
 files = [
-    {file = "httplib2-0.19.0-py3-none-any.whl", hash = "sha256:749c32603f9bf16c1277f59531d502e8f1c2ca19901ae653b49c4ed698f0820e"},
-    {file = "httplib2-0.19.0.tar.gz", hash = "sha256:e0d428dad43c72dbce7d163b7753ffc7a39c097e6788ef10f4198db69b92f08e"},
+    {file = "httplib2-0.31.2-py3-none-any.whl", hash = "sha256:dbf0c2fa3862acf3c55c078ea9c0bc4481d7dc5117cae71be9514912cf9f8349"},
+    {file = "httplib2-0.31.2.tar.gz", hash = "sha256:385e0869d7397484f4eab426197a4c020b606edd43372492337c0b4010ae5d24"},
 ]
 
 [package.dependencies]
-pyparsing = ">=2.4.2,<3"
+pyparsing = ">=3.1,<4"
 
 [[package]]
 name = "httpx"
@@ -2238,6 +2238,7 @@ files = [
     {file = "ibm_db-3.2.9-cp314-cp314-win32.whl", hash = "sha256:350d6e40c62340b583b6aa4887730a626191290fa91f63d9f7e58ff60edf17af"},
     {file = "ibm_db-3.2.9-cp314-cp314-win_amd64.whl", hash = "sha256:62b2fc14da8b49895f6d9670a3bdce65d8ea2a5fdabd00303fbe404b8f84d947"},
     {file = "ibm_db-3.2.9-cp314-cp314t-macosx_10_15_x86_64.whl", hash = "sha256:5fa430ce90eda04f2b1326a84817f09ad6a9f16d475afacb43522debf4283300"},
+    {file = "ibm_db-3.2.9.tar.gz", hash = "sha256:0ad6dc4575519a5563fd7f845fc6bc00d688020e1d3ae78d382e79183bc32b0b"},
 ]
 
 [[package]]
@@ -2476,6 +2477,18 @@ groups = ["dev"]
 files = [
     {file = "iniconfig-2.3.0-py3-none-any.whl", hash = "sha256:f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12"},
     {file = "iniconfig-2.3.0.tar.gz", hash = "sha256:c76315c77db068650d49c5b56314774a7804df16fee4402c1f19d6d15d8c4730"},
+]
+
+[[package]]
+name = "invoke"
+version = "3.0.3"
+description = "Pythonic task execution"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "invoke-3.0.3-py3-none-any.whl", hash = "sha256:f11327165e5cbb89b2ad1d88d3292b5113332c43b8553b494da435d6ec6f5053"},
+    {file = "invoke-3.0.3.tar.gz", hash = "sha256:437b6a622223824380bfb4e64f612711a6b648c795f565efc8625af66fb57f0c"},
 ]
 
 [[package]]
@@ -3546,25 +3559,21 @@ xml = ["lxml (>=4.9.2)"]
 
 [[package]]
 name = "paramiko"
-version = "3.4.1"
+version = "5.0.0"
 description = "SSH2 protocol library"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "paramiko-3.4.1-py3-none-any.whl", hash = "sha256:8e49fd2f82f84acf7ffd57c64311aa2b30e575370dc23bdb375b10262f7eac32"},
-    {file = "paramiko-3.4.1.tar.gz", hash = "sha256:8b15302870af7f6652f2e038975c1d2973f06046cb5d7d65355668b3ecbece0c"},
+    {file = "paramiko-5.0.0-py3-none-any.whl", hash = "sha256:b7044611c30140d9a75261653210e2002977b71a0497ff3ba0d98d7edbf62f7c"},
+    {file = "paramiko-5.0.0.tar.gz", hash = "sha256:36763b5b95c2a0dcfdf1abc48e48156ee425b21efe2f0e787c2dd5a95c0e5e79"},
 ]
 
 [package.dependencies]
 bcrypt = ">=3.2"
 cryptography = ">=3.3"
+invoke = ">=2.0"
 pynacl = ">=1.5"
-
-[package.extras]
-all = ["gssapi (>=1.4.1) ; platform_system != \"Windows\"", "invoke (>=2.0)", "pyasn1 (>=0.1.7)", "pywin32 (>=2.1.8) ; platform_system == \"Windows\""]
-gssapi = ["gssapi (>=1.4.1) ; platform_system != \"Windows\"", "pyasn1 (>=0.1.7)", "pywin32 (>=2.1.8) ; platform_system == \"Windows\""]
-invoke = ["invoke (>=2.0)"]
 
 [[package]]
 name = "parsedatetime"
@@ -4493,15 +4502,18 @@ test = ["pretend", "pytest (>=3.0.1)", "pytest-rerunfailures"]
 
 [[package]]
 name = "pyparsing"
-version = "2.4.7"
-description = "Python parsing module"
+version = "3.3.2"
+description = "pyparsing - Classes and methods to define and execute parsing grammars"
 optional = false
-python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+python-versions = ">=3.9"
 groups = ["main", "all-ds"]
 files = [
-    {file = "pyparsing-2.4.7-py2.py3-none-any.whl", hash = "sha256:ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b"},
-    {file = "pyparsing-2.4.7.tar.gz", hash = "sha256:c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1"},
+    {file = "pyparsing-3.3.2-py3-none-any.whl", hash = "sha256:850ba148bd908d7e2411587e247a1e4f0327839c40e2e5e6d05a007ecc69911d"},
+    {file = "pyparsing-3.3.2.tar.gz", hash = "sha256:c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc"},
 ]
+
+[package.extras]
+diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pypd"
@@ -6505,4 +6517,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "074b3ed8736444d54c0e64d37b62848cf63c2812c01173e7e0a42552f2084720"
+content-hash = "6d5197cc64a1a63b1350a4c665092ff2e7c036bd871f47b8e95a22bf291e4542"
