@@ -43,11 +43,7 @@ RUN if [ -n "${SKIP_FRONTEND_BUILD:-}" ]; then \
     fi \
     && test -f /frontend/client/dist/index.html
 
-FROM python:3.14-slim-trixie
-
-EXPOSE 5000
-
-RUN useradd --create-home redash
+FROM python:3.14-slim-trixie AS python-builder
 
 # Add Debian trixie-security and trixie-updates repositories so we get the latest
 # security fixes and stable point updates at build time.
@@ -60,8 +56,6 @@ RUN set -eux; \
   printf 'deb http://deb.debian.org/debian trixie-proposed-updates main\n' \
     > /etc/apt/sources.list.d/trixie-proposed-updates.list
 
-# Apply security archive first (forces -t trixie-security so the security pocket wins),
-# then a general upgrade for stable point updates, then install build dependencies.
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-security upgrade && \
   DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-updates upgrade && \
@@ -69,50 +63,13 @@ RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   pkg-config \
   curl \
-  gnupg \
   build-essential \
-  pwgen \
-  libffi-dev \
-  sudo \
   git-core \
-  # Kerberos, needed for MS SQL Python driver to compile on arm64
-  libkrb5-dev \
-  # Postgres client
+  libffi-dev \
   libpq-dev \
-  # ODBC support:
-  g++ unixodbc-dev \
-  # for SAML
-  xmlsec1 \
-  # Additional packages required for data sources:
-  libssl-dev \
-  default-libmysqlclient-dev \
-  freetds-dev \
-  libsasl2-dev \
-  unzip \
-  libsasl2-modules-gssapi-mit && \
+  libssl-dev && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
-
-
-ARG TARGETPLATFORM
-ARG databricks_odbc_driver_url=https://databricks-bi-artifacts.s3.us-east-2.amazonaws.com/simbaspark-drivers/odbc/2.9.2/SimbaSparkODBC-2.9.2.1008-Debian-64bit.zip
-RUN <<EOF
-  if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-    curl https://packages.microsoft.com/config/debian/13/prod.list > /etc/apt/sources.list.d/mssql-release.list
-    apt-get update
-    ACCEPT_EULA=Y apt-get install  -y --no-install-recommends msodbcsql18
-    apt-get clean
-    rm -rf /var/lib/apt/lists/*
-    curl "$databricks_odbc_driver_url" --location --output /tmp/simba_odbc.zip
-    chmod 600 /tmp/simba_odbc.zip
-    unzip /tmp/simba_odbc.zip -d /tmp/simba
-    dpkg -i /tmp/simba/*.deb
-    printf "[Simba]\nDriver = /opt/simba/spark/lib/64/libsparkodbc_sb64.so" >> /etc/odbcinst.ini
-    rm /tmp/simba_odbc.zip
-    rm -rf /tmp/simba
-  fi
-EOF
 
 WORKDIR /app
 
@@ -128,8 +85,45 @@ RUN /etc/poetry/bin/poetry cache clear pypi --all
 
 COPY pyproject.toml poetry.lock ./
 
-# Install ALL dependencies including dev and data source dependencies for testing
-RUN /etc/poetry/bin/poetry install --with dev --with all_ds --no-root --no-interaction --no-ansi
+# Comma-separated optional Poetry groups (e.g. athena, all_ds,dev).
+ARG poetry_groups=athena
+RUN set -eux; \
+  poetry_with_args=""; \
+  for group in $(echo "${poetry_groups}" | tr ',' ' '); do \
+    poetry_with_args="${poetry_with_args} --with ${group}"; \
+  done; \
+  /etc/poetry/bin/poetry install ${poetry_with_args} --no-root --no-interaction --no-ansi
+
+FROM python:3.14-slim-trixie
+
+EXPOSE 5000
+
+RUN useradd --create-home redash
+
+RUN set -eux; \
+  printf 'deb http://deb.debian.org/debian-security trixie-security main\n' \
+    > /etc/apt/sources.list.d/trixie-security.list; \
+  printf 'deb http://deb.debian.org/debian trixie-updates main\n' \
+    > /etc/apt/sources.list.d/trixie-updates.list; \
+  printf 'deb http://deb.debian.org/debian trixie-proposed-updates main\n' \
+    > /etc/apt/sources.list.d/trixie-proposed-updates.list
+
+# Runtime OS packages only (build tools stay in python-builder).
+RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-security upgrade && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-updates upgrade && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
+  apt-get install -y --no-install-recommends \
+  libpq5 \
+  xmlsec1 && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=python-builder /usr/local /usr/local
+
+ENV REDASH_ENABLED_QUERY_RUNNERS=redash.query_runner.athena,redash.query_runner.query_results
 
 COPY --chown=redash . /app
 COPY --from=frontend-builder --chown=redash /frontend/client/dist /app/client/dist

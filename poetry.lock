@@ -405,7 +405,7 @@ version = "1.43.7"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.10"
-groups = ["all-ds"]
+groups = ["all-ds", "athena"]
 files = [
     {file = "boto3-1.43.7-py3-none-any.whl", hash = "sha256:7060f603ca0f645153ee2244506db4db5968a858cd513399d8df70637c362159"},
     {file = "boto3-1.43.7.tar.gz", hash = "sha256:b1e4b40f4a828c67291b12ebefd17d87a57321101e4a0c969b2f593a0310f343"},
@@ -425,7 +425,7 @@ version = "1.43.7"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.10"
-groups = ["all-ds"]
+groups = ["all-ds", "athena"]
 files = [
     {file = "botocore-1.43.7-py3-none-any.whl", hash = "sha256:e93f25dc186a9de033c87128c0f2016aedd74aea9057d918bfc0703a946b1ad1"},
     {file = "botocore-1.43.7.tar.gz", hash = "sha256:abbbc623c52dce86ea9d4534d35e2d6ce447d98edfdaced1695ee0278d6063e3"},
@@ -1131,7 +1131,7 @@ version = "1.8.20"
 description = "An implementation of the Debug Adapter Protocol for Python"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["dev"]
 files = [
     {file = "debugpy-1.8.20-cp310-cp310-macosx_15_0_x86_64.whl", hash = "sha256:157e96ffb7f80b3ad36d808646198c90acb46fdcfd8bb1999838f0b6f2b59c64"},
     {file = "debugpy-1.8.20-cp310-cp310-manylinux_2_34_x86_64.whl", hash = "sha256:c1178ae571aff42e61801a38b007af504ec8e05fde1c5c12e5a7efef21009642"},
@@ -1572,7 +1572,7 @@ version = "2026.4.0"
 description = "File-system specification"
 optional = false
 python-versions = ">=3.10"
-groups = ["all-ds"]
+groups = ["all-ds", "athena"]
 files = [
     {file = "fsspec-2026.4.0-py3-none-any.whl", hash = "sha256:11ef7bb35dab8a394fde6e608221d5cf3e8499401c249bebaeaad760a1a8dec2"},
     {file = "fsspec-2026.4.0.tar.gz", hash = "sha256:301d8ac70ae90ef3ad05dcf94d6c3754a097f9b5fe4667d2787aa359ec7df7e4"},
@@ -2203,7 +2203,7 @@ version = "3.2.9"
 description = "Python DBI driver for DB2 (LUW, zOS, i5)"
 optional = false
 python-versions = "*"
-groups = ["main"]
+groups = ["all-ds"]
 markers = "platform_machine == \"x86_64\" or platform_machine == \"AMD64\""
 files = [
     {file = "ibm_db-3.2.9-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:e130a461a0ce3fecdb9896ec767d95d89d4f14e5eb4b8b5e63aca249790c5155"},
@@ -2545,7 +2545,7 @@ version = "1.1.0"
 description = "JSON Matching Expressions"
 optional = false
 python-versions = ">=3.9"
-groups = ["all-ds"]
+groups = ["all-ds", "athena"]
 files = [
     {file = "jmespath-1.1.0-py3-none-any.whl", hash = "sha256:a5663118de4908c91729bea0acadca56526eb2698e83de10cd116ae0f4e97c64"},
     {file = "jmespath-1.1.0.tar.gz", hash = "sha256:472c87d80f36026ae83c6ddd0f1d05d4e510134ed462851fd5f754c8c3cbb88d"},
@@ -3310,7 +3310,7 @@ version = "2.5.1"
 description = "Python interface to Oracle Database"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["all-ds"]
 files = [
     {file = "oracledb-2.5.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:54ea7b4da179eb3fefad338685b44fed657a9cd733fb0bfc09d344cfb266355e"},
     {file = "oracledb-2.5.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:05df7a5a61f4d26c986e235fae6f64a81afaac8f1dbef60e2e9ecf9236218e58"},
@@ -3967,7 +3967,7 @@ version = "2.25.2"
 description = "Python DB API 2.0 (PEP 249) client for Amazon Athena"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
-groups = ["all-ds"]
+groups = ["all-ds", "athena"]
 files = [
     {file = "pyathena-2.25.2-py3-none-any.whl", hash = "sha256:df7855fec5cc675511431d7c72b814346ebd7e51ed32181ec95847154f79210b"},
     {file = "pyathena-2.25.2.tar.gz", hash = "sha256:aebb8254dd7b2a450841ee3552bf443002a2deaed93fae0ae6f4258b5eb2d367"},
@@ -4409,7 +4409,7 @@ version = "5.3.0"
 description = "DB API module for ODBC"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "all-ds"]
+groups = ["all-ds"]
 files = [
     {file = "pyodbc-5.3.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:6682cdec78f1302d0c559422c8e00991668e039ed63dece8bf99ef62173376a5"},
     {file = "pyodbc-5.3.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:9cd3f0a9796b3e1170a9fa168c7e7ca81879142f30e20f46663b882db139b7d2"},
@@ -4675,7 +4675,7 @@ version = "2.9.0.post0"
 description = "Extensions to the standard Python datetime module"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
-groups = ["main", "all-ds", "dev"]
+groups = ["main", "all-ds", "athena", "dev"]
 files = [
     {file = "python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"},
     {file = "python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"},
@@ -5252,7 +5252,7 @@ version = "0.17.0"
 description = "An Amazon S3 Transfer Manager"
 optional = false
 python-versions = ">=3.10"
-groups = ["all-ds"]
+groups = ["all-ds", "athena"]
 files = [
     {file = "s3transfer-0.17.0-py3-none-any.whl", hash = "sha256:ce3801712acf4ad3e89fb9990df97b4972e93f4b3b0004d214be5bce12814c20"},
     {file = "s3transfer-0.17.0.tar.gz", hash = "sha256:9edeb6d1c3c2f89d6050348548834ad8289610d886e5bf7b7207728bd43ce33a"},
@@ -5500,7 +5500,7 @@ version = "1.17.0"
 description = "Python 2 and 3 compatibility utilities"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
-groups = ["main", "all-ds", "dev"]
+groups = ["main", "all-ds", "athena", "dev"]
 files = [
     {file = "six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"},
     {file = "six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"},
@@ -5811,7 +5811,7 @@ version = "9.1.4"
 description = "Retry code until it succeeds"
 optional = false
 python-versions = ">=3.10"
-groups = ["all-ds"]
+groups = ["all-ds", "athena"]
 files = [
     {file = "tenacity-9.1.4-py3-none-any.whl", hash = "sha256:6095a360c919085f28c6527de529e76a06ad89b23659fa881ae0649b867a9d55"},
     {file = "tenacity-9.1.4.tar.gz", hash = "sha256:adb31d4c263f2bd041081ab33b498309a57c77f9acf2db65aadf0898179cf93a"},
@@ -5971,7 +5971,7 @@ version = "2.7.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.10"
-groups = ["main", "all-ds", "ssrf"]
+groups = ["main", "all-ds", "athena", "ssrf"]
 files = [
     {file = "urllib3-2.7.0-py3-none-any.whl", hash = "sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"},
     {file = "urllib3-2.7.0.tar.gz", hash = "sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c"},
@@ -6513,4 +6513,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.15"
-content-hash = "fa7ebb60adccacf189a98c3cee7744667eff965bd811255d2d0c48f7c08bc2ea"
+content-hash = "9213360793cf3e4532aa56d6d85071fb0eee8486dd331df3d2c8f38465dcf304"

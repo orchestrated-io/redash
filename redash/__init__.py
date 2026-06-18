@@ -18,10 +18,15 @@ __version__ = "26.3.0"
 
 
 if os.environ.get("REMOTE_DEBUG"):
-    import debugpy
-
-    debugpy.listen(("0.0.0.0", 5678))
-    debugpy.wait_for_client()
+    try:
+        import debugpy
+    except ImportError:
+        logging.getLogger(__name__).warning(
+            "REMOTE_DEBUG is set but debugpy is not installed (install the dev Poetry group)"
+        )
+    else:
+        debugpy.listen(("0.0.0.0", 5678))
+        debugpy.wait_for_client()
 
 
 def setup_logging():
