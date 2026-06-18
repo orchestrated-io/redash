@@ -12,6 +12,7 @@ x-redash-service: &redash-service
     context: .
     args:
       skip_frontend_build: "" # set to empty string to build
+      poetry_groups: athena,dev # dev compose: pytest + all query runners for tests
   volumes:
     - .:/app
   env_file:
@@ -27,6 +28,8 @@ x-redash-environment: &redash-environment
   REDASH_MAIL_PORT: 1025
   REDASH_ENFORCE_CSRF: "true"
   REDASH_GUNICORN_TIMEOUT: 60
+  # Override Dockerfile production default so dev/tests can use sqlite etc.
+  REDASH_ENABLED_QUERY_RUNNERS: "redash.query_runner.athena,redash.query_runner.query_results,redash.query_runner.sqlite"
   # Set secret keys in the .env file
 services:
   server:

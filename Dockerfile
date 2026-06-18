@@ -88,6 +88,18 @@ COPY pyproject.toml poetry.lock ./
 # Comma-separated optional Poetry groups (e.g. athena, all_ds,dev).
 ARG poetry_groups=athena
 RUN set -eux; \
+  if echo ",${poetry_groups}," | grep -q ',all_ds,'; then \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      libkrb5-dev \
+      default-libmysqlclient-dev \
+      freetds-dev \
+      unixodbc-dev \
+      libsasl2-dev \
+      libsasl2-modules-gssapi-mit; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*; \
+  fi; \
   poetry_with_args=""; \
   for group in $(echo "${poetry_groups}" | tr ',' ' '); do \
     poetry_with_args="${poetry_with_args} --with ${group}"; \
