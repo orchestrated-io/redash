@@ -116,6 +116,12 @@ RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   libpq5 \
   xmlsec1 && \
+  DEBIAN_FRONTEND=noninteractive apt-get remove -y --allow-remove-essential --purge \
+  perl-base \
+  libncursesw6 \
+  ncurses-bin \
+  ncurses-base && \
+  apt-get autoremove -y && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
