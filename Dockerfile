@@ -48,18 +48,24 @@ FROM python:3.14-slim-trixie AS python-builder
 # Add Debian trixie-security and trixie-updates repositories so we get the latest
 # security fixes and stable point updates at build time.
 # trixie-proposed-updates is kept for opt-in pre-release fixes already in flight.
+# CVE-2026-5450: trixie glibc 2.41 has no DSA backport; pull libc6 2.42-17 from sid.
 RUN set -eux; \
   printf 'deb http://deb.debian.org/debian-security trixie-security main\n' \
     > /etc/apt/sources.list.d/trixie-security.list; \
   printf 'deb http://deb.debian.org/debian trixie-updates main\n' \
     > /etc/apt/sources.list.d/trixie-updates.list; \
   printf 'deb http://deb.debian.org/debian trixie-proposed-updates main\n' \
-    > /etc/apt/sources.list.d/trixie-proposed-updates.list
+    > /etc/apt/sources.list.d/trixie-proposed-updates.list; \
+  printf 'deb http://deb.debian.org/debian sid main\n' \
+    > /etc/apt/sources.list.d/sid.list; \
+  printf 'Package: libc6 libc-bin libc-gconv-modules-extra\nPin: release a=sid\nPin-Priority: 1001\n' \
+    > /etc/apt/preferences.d/sid-glibc.pref
 
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-security upgrade && \
   DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-updates upgrade && \
   DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t sid install libc6 libc-bin && \
   apt-get install -y --no-install-recommends \
   pkg-config \
   curl \
@@ -118,13 +124,18 @@ RUN set -eux; \
   printf 'deb http://deb.debian.org/debian trixie-updates main\n' \
     > /etc/apt/sources.list.d/trixie-updates.list; \
   printf 'deb http://deb.debian.org/debian trixie-proposed-updates main\n' \
-    > /etc/apt/sources.list.d/trixie-proposed-updates.list
+    > /etc/apt/sources.list.d/trixie-proposed-updates.list; \
+  printf 'deb http://deb.debian.org/debian sid main\n' \
+    > /etc/apt/sources.list.d/sid.list; \
+  printf 'Package: libc6 libc-bin libc-gconv-modules-extra\nPin: release a=sid\nPin-Priority: 1001\n' \
+    > /etc/apt/preferences.d/sid-glibc.pref
 
 # Runtime OS packages only (build tools stay in python-builder).
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-security upgrade && \
   DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-updates upgrade && \
   DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t sid install libc6 libc-bin && \
   apt-get install -y --no-install-recommends \
   libpq5 \
   xmlsec1 && \
