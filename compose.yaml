@@ -1,10 +1,18 @@
 # This configuration file is for the **development** setup.
 # For a production example please refer to getredash/setup repository on GitHub.
+#
+# Bind-mount `.:/app` so the repo (including `client/dist` after `yarn build`) is what the
+# container serves. Run `yarn build` on the host when changing the frontend; db-logos and other
+# assets under `client/dist/images/` are copied there by webpack (see webpack.config.js).
+#
+# Fresh clone with no `client/dist` yet: `docker compose build` (builds the UI in the image)
+# then `docker compose up`, or run `yarn build` before `docker compose up`.
 x-redash-service: &redash-service
   build:
     context: .
     args:
-      skip_frontend_build: "true"  # set to empty string to build
+      skip_frontend_build: "" # set to empty string to build
+      poetry_groups: athena,dev # dev compose: pytest + all query runners for tests
   volumes:
     - .:/app
   env_file:
@@ -20,6 +28,8 @@ x-redash-environment: &redash-environment
   REDASH_MAIL_PORT: 1025
   REDASH_ENFORCE_CSRF: "true"
   REDASH_GUNICORN_TIMEOUT: 60
+  # Override Dockerfile production default so dev/tests can use sqlite etc.
+  REDASH_ENABLED_QUERY_RUNNERS: "redash.query_runner.athena,redash.query_runner.query_results,redash.query_runner.sqlite"
   # Set secret keys in the .env file
 services:
   server:
@@ -29,7 +39,7 @@ services:
       - postgres
       - redis
     ports:
-      - "5000:5000"
+      - "5001:5000"
       - "5678:5678"
     environment:
       <<: *redash-environment

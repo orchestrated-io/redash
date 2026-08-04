@@ -403,11 +403,10 @@ class TestUserForgotPassword(BaseTestCase):
         self.db.session.add(user)
         self.db.session.commit()
 
-        with patch(
-            "redash.handlers.authentication.send_password_reset_email"
-        ) as send_password_reset_email_mock, patch(
-            "redash.handlers.authentication.send_user_disabled_email"
-        ) as send_user_disabled_email_mock:
+        with (
+            patch("redash.handlers.authentication.send_password_reset_email") as send_password_reset_email_mock,
+            patch("redash.handlers.authentication.send_user_disabled_email") as send_user_disabled_email_mock,
+        ):
             response = self.post_request("/forgot", org=user.org, data={"email": user.email})
             self.assertEqual(response.status_code, 200)
             send_password_reset_email_mock.assert_not_called()
@@ -423,7 +422,7 @@ class TestJWTAuthentication(BaseTestCase):
         self.rsa_private_key = "/tmp/jwtRS256.key"
         self.rsa_public_key = "/tmp/jwtRS256.pem"
 
-        if not os.path.exists(self.rsa_public_key):
+        if not (os.path.isfile(self.rsa_private_key) and os.path.isfile(self.rsa_public_key)):
             subprocess.check_output(["openssl", "genrsa", "-out", self.rsa_private_key, "4096"])
             subprocess.check_output(
                 ["openssl", "rsa", "-pubout", "-in", self.rsa_private_key, "-out", self.rsa_public_key]
@@ -441,6 +440,8 @@ class TestJWTAuthentication(BaseTestCase):
         org_settings["auth_jwt_auth_issuer"] = ""
         org_settings["auth_jwt_auth_audience"] = ""
         org_settings["auth_jwt_auth_header_name"] = ""
+        jwt_auth.get_public_keys.key_cache.clear()
+        super(TestJWTAuthentication, self).tearDown()
 
     def test_jwt_no_token(self):
         response = self.get_request("/data_sources", org=self.factory.org)

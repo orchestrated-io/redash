@@ -24,96 +24,137 @@ ENV BABEL_ENV=${code_coverage:+test}
 # Avoid issues caused by lags in disk and network I/O speeds when working on top of QEMU emulation for multi-platform image building.
 RUN yarn config set network-timeout 300000
 
-RUN if [ "x$skip_frontend_build" = "x" ] ; then yarn --frozen-lockfile --network-concurrency 1; fi
+RUN if [ -z "${SKIP_FRONTEND_BUILD:-}" ] ; then yarn install --frozen-lockfile --network-concurrency 1; fi
 
 COPY --chown=redash client /frontend/client
 COPY --chown=redash webpack.config.js /frontend/
-RUN <<EOF
-  if [ "x$skip_frontend_build" = "x" ]; then
-    yarn build
-  else
-    mkdir -p /frontend/client/dist
-    touch /frontend/client/dist/multi_org.html
-    touch /frontend/client/dist/index.html
-  fi
-EOF
+# Use explicit webpack invocation: some environments resolve `webpack` inconsistently after `yarn build:viz`.
+# `set -ex` surfaces the first failing command (clean, viz, or webpack).
+RUN if [ -n "${SKIP_FRONTEND_BUILD:-}" ]; then \
+      mkdir -p /frontend/client/dist \
+      && touch /frontend/client/dist/multi_org.html \
+      && touch /frontend/client/dist/index.html; \
+    else \
+      set -ex; \
+      yarn clean; \
+      yarn build:viz; \
+      NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production \
+        ./node_modules/.bin/webpack build --config ./webpack.config.js; \
+    fi \
+    && test -f /frontend/client/dist/index.html
 
-FROM python:3.13-slim-trixie
+FROM python:3.14-slim-trixie AS python-builder
 
-EXPOSE 5000
+# Add Debian trixie-security and trixie-updates repositories so we get the latest
+# security fixes and stable point updates at build time.
+# trixie-proposed-updates is kept for opt-in pre-release fixes already in flight.
+# CVE-2026-5450: trixie glibc 2.41 has no DSA backport; pull libc6 2.42-17 from sid
+# after trixie upgrades (sid must not be enabled during upgrades — it rewrites
+# /etc/os-release to forky/sid and breaks Amazon Inspector ECR scanning).
+RUN set -eux; \
+  printf 'deb http://deb.debian.org/debian-security trixie-security main\n' \
+    > /etc/apt/sources.list.d/trixie-security.list; \
+  printf 'deb http://deb.debian.org/debian trixie-updates main\n' \
+    > /etc/apt/sources.list.d/trixie-updates.list; \
+  printf 'deb http://deb.debian.org/debian trixie-proposed-updates main\n' \
+    > /etc/apt/sources.list.d/trixie-proposed-updates.list
 
-RUN useradd --create-home redash
-
-# Add Debian trixie-proposed-updates repository
-RUN echo "deb http://deb.debian.org/debian trixie-proposed-updates main" > /etc/apt/sources.list.d/trixie-proposed-updates.list
-
-# Ubuntu packages
 RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-security upgrade && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-updates upgrade && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
+  printf 'deb http://deb.debian.org/debian sid main\n' > /etc/apt/sources.list.d/sid.list && \
+  printf 'Package: *\nPin: release a=sid\nPin-Priority: 100\n\nPackage: libc6 libc-bin libc-gconv-modules-extra\nPin: release a=sid\nPin-Priority: 1001\n' \
+    > /etc/apt/preferences.d/sid-glibc.pref && \
+  apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t sid install libc6 libc-bin && \
   apt-get install -y --no-install-recommends \
   pkg-config \
   curl \
-  gnupg \
   build-essential \
-  pwgen \
-  libffi-dev \
-  sudo \
   git-core \
-  # Kerberos, needed for MS SQL Python driver to compile on arm64
-  libkrb5-dev \
-  # Postgres client
+  libffi-dev \
   libpq-dev \
-  # ODBC support:
-  g++ unixodbc-dev \
-  # for SAML
-  xmlsec1 \
-  # Additional packages required for data sources:
-  libssl-dev \
-  default-libmysqlclient-dev \
-  freetds-dev \
-  libsasl2-dev \
-  unzip \
-  libsasl2-modules-gssapi-mit && \
+  libssl-dev && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-
-ARG TARGETPLATFORM
-ARG databricks_odbc_driver_url=https://databricks-bi-artifacts.s3.us-east-2.amazonaws.com/simbaspark-drivers/odbc/2.9.2/SimbaSparkODBC-2.9.2.1008-Debian-64bit.zip
-RUN <<EOF
-  if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-    curl https://packages.microsoft.com/config/debian/13/prod.list > /etc/apt/sources.list.d/mssql-release.list
-    apt-get update
-    ACCEPT_EULA=Y apt-get install  -y --no-install-recommends msodbcsql18
-    apt-get clean
-    rm -rf /var/lib/apt/lists/*
-    curl "$databricks_odbc_driver_url" --location --output /tmp/simba_odbc.zip
-    chmod 600 /tmp/simba_odbc.zip
-    unzip /tmp/simba_odbc.zip -d /tmp/simba
-    dpkg -i /tmp/simba/*.deb
-    printf "[Simba]\nDriver = /opt/simba/spark/lib/64/libsparkodbc_sb64.so" >> /etc/odbcinst.ini
-    rm /tmp/simba_odbc.zip
-    rm -rf /tmp/simba
-  fi
-EOF
-
 WORKDIR /app
 
-ENV POETRY_VERSION=2.1.4
+# Keep aligned with Docker Scout / CVE fixes (path traversal etc. in older installers).
+ENV POETRY_VERSION=2.4.1
 ENV POETRY_HOME=/etc/poetry
 ENV POETRY_VIRTUALENVS_CREATE=false
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN python3 -m pip install --no-cache-dir --upgrade "pip>=26.2" "setuptools>=83.0.0" "wheel>=0.46.2" \
+  && curl -sSL --retry 3 --retry-delay 5 https://install.python-poetry.org | python3 -
 
 # Avoid crashes, including corrupted cache artifacts, when building multi-platform images with GitHub Actions.
 RUN /etc/poetry/bin/poetry cache clear pypi --all
 
 COPY pyproject.toml poetry.lock ./
 
-ARG POETRY_OPTIONS="--no-root --no-interaction --no-ansi"
-# for LDAP authentication, install with `ldap3` group
-# disabled by default due to GPL license conflict
-ARG install_groups="main,all_ds,dev"
-RUN /etc/poetry/bin/poetry install --only $install_groups $POETRY_OPTIONS
+# Comma-separated optional Poetry groups (e.g. athena, all_ds,dev).
+ARG poetry_groups=athena
+RUN set -eux; \
+  if echo ",${poetry_groups}," | grep -q ',all_ds,'; then \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      libkrb5-dev \
+      default-libmysqlclient-dev \
+      freetds-dev \
+      unixodbc-dev \
+      libsasl2-dev \
+      libsasl2-modules-gssapi-mit; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*; \
+  fi; \
+  poetry_with_args=""; \
+  for group in $(echo "${poetry_groups}" | tr ',' ' '); do \
+    poetry_with_args="${poetry_with_args} --with ${group}"; \
+  done; \
+  /etc/poetry/bin/poetry install ${poetry_with_args} --no-root --no-interaction --no-ansi
+
+FROM python:3.14-slim-trixie
+
+EXPOSE 5000
+
+RUN useradd --create-home redash
+
+RUN set -eux; \
+  printf 'deb http://deb.debian.org/debian-security trixie-security main\n' \
+    > /etc/apt/sources.list.d/trixie-security.list; \
+  printf 'deb http://deb.debian.org/debian trixie-updates main\n' \
+    > /etc/apt/sources.list.d/trixie-updates.list; \
+  printf 'deb http://deb.debian.org/debian trixie-proposed-updates main\n' \
+    > /etc/apt/sources.list.d/trixie-proposed-updates.list
+
+# Runtime OS packages only (build tools stay in python-builder).
+RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-security upgrade && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-updates upgrade && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
+  printf 'deb http://deb.debian.org/debian sid main\n' > /etc/apt/sources.list.d/sid.list && \
+  printf 'Package: *\nPin: release a=sid\nPin-Priority: 100\n\nPackage: libc6 libc-bin libc-gconv-modules-extra\nPin: release a=sid\nPin-Priority: 1001\n' \
+    > /etc/apt/preferences.d/sid-glibc.pref && \
+  apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t sid install libc6 libc-bin && \
+  apt-get install -y --no-install-recommends \
+  libpq5 \
+  xmlsec1 && \
+  DEBIAN_FRONTEND=noninteractive apt-get remove -y --allow-remove-essential --purge \
+  perl-base \
+  libncursesw6 \
+  ncurses-bin \
+  ncurses-base && \
+  apt-get autoremove -y && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=python-builder /usr/local /usr/local
+
+ENV REDASH_ENABLED_QUERY_RUNNERS=redash.query_runner.athena,redash.query_runner.query_results
 
 COPY --chown=redash . /app
 COPY --from=frontend-builder --chown=redash /frontend/client/dist /app/client/dist
