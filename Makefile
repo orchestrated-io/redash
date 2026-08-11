@@ -1,4 +1,8 @@
-.PHONY: compose_build up test_db create_database clean down tests lint backend-unit-tests frontend-unit-tests test build watch start redis-cli bash
+.PHONY: compose_build up test_db create_database clean down tests lint backend-unit-tests frontend-unit-tests test build watch start redis-cli bash ecr_push
+
+# buildx attaches provenance attestations by default; they produce an OCI image index
+# that Amazon Inspector ECR scanning rejects as UNSUPPORTED_IMAGE.
+export BUILDX_NO_DEFAULT_ATTESTATIONS := 1
 
 compose_build: .env
 	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker compose build
@@ -79,3 +83,10 @@ redis-cli:
 
 bash:
 	docker compose run --rm server bash
+
+# Push a single-platform image to ECR without build attestations.
+# Usage: make ecr_push ECR_REPO=639989371409.dkr.ecr.ap-southeast-2.amazonaws.com/redash TAG=v26.3.0p27
+ecr_push:
+	@test -n "$(ECR_REPO)" || (echo "ECR_REPO is required" && exit 1)
+	@test -n "$(TAG)" || (echo "TAG is required" && exit 1)
+	.ci/build_ecr_image "$(ECR_REPO)" "$(TAG)"

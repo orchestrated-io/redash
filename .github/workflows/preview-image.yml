@@ -16,6 +16,8 @@ on:
 
 env:
   NODE_VERSION: 20
+  # OCI provenance attestations break Amazon Inspector ECR scanning on tagged digests.
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
 
 jobs:
   build-skip-check:
@@ -106,6 +108,8 @@ jobs:
           build-args: |
             test_all_deps=true
           outputs: type=image,push-by-digest=true,push=true
+          provenance: false
+          sbom: false
           cache-from: type=gha,scope=${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=${{ matrix.arch }}
         env:
@@ -122,6 +126,8 @@ jobs:
           build-args: |
             test_all_deps=true
           outputs: type=image,push-by-digest=false,push=true
+          provenance: false
+          sbom: false
           cache-from: type=gha,scope=${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=${{ matrix.arch }}
         env:
