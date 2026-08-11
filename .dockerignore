@@ -2,11 +2,6 @@ client/.tmp/
 # Avoid copying an empty or stale host bundle into the image; assets come from frontend-builder.
 client/dist/
 node_modules/
-# Build metadata only; Inspector flags devDependency CVEs from lockfiles in the runtime image.
-package.json
-yarn.lock
-viz-lib/package.json
-viz-lib/yarn.lock
 pnpm-lock.yaml
 .yarn-cache/
 .yarn/

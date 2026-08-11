@@ -158,6 +158,8 @@ ENV REDASH_ENABLED_QUERY_RUNNERS=redash.query_runner.athena,redash.query_runner.
 
 COPY --chown=redash . /app
 COPY --from=frontend-builder --chown=redash /frontend/client/dist /app/client/dist
+# Frontend lockfiles are build-only; drop them so Inspector does not flag devDependency CVEs.
+RUN rm -f /app/package.json /app/yarn.lock /app/viz-lib/package.json /app/viz-lib/yarn.lock
 RUN chown redash /app
 USER redash
 
