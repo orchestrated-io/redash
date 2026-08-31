@@ -5138,14 +5138,14 @@ requests = ">=2.0.1,<3.0.0"
 
 [[package]]
 name = "restrictedpython"
-version = "8.1"
+version = "8.3"
 description = "RestrictedPython is a defined subset of the Python language which allows to provide a program input into a trusted environment."
 optional = false
-python-versions = "<3.15,>=3.9"
+python-versions = "<3.16,>=3.10"
 groups = ["main"]
 files = [
-    {file = "restrictedpython-8.1-py3-none-any.whl", hash = "sha256:4769449c6cdb10f2071649ba386902befff0eff2a8fd6217989fa7b16aeae926"},
-    {file = "restrictedpython-8.1.tar.gz", hash = "sha256:4a69304aceacf6bee74bdf153c728221d4e3109b39acbfe00b3494927080d898"},
+    {file = "restrictedpython-8.3-py3-none-any.whl", hash = "sha256:de36a9b27ad4490a368984984751179e5fc28e2b49540dc348878e5c0e79d737"},
+    {file = "restrictedpython-8.3.tar.gz", hash = "sha256:9f31663ff2b86d9112bd7af4cd0601f12ef619c4f6ad162a1c9f9f186341337a"},
 ]
 
 [package.extras]
@@ -6514,4 +6514,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.15"
-content-hash = "645c06e6555d202915357ee2eec4600752fb52f14048998558da493af721fcae"
+content-hash = "e96fb60291f3df23eabcc60c6a54cfcef8235e64fb6899388599a1ae95fb7fe3"
