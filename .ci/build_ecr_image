@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 <ecr-repository> <tag>" >&2
+  echo "Example: $0 639989371409.dkr.ecr.ap-southeast-2.amazonaws.com/redash v26.3.0p27" >&2
+  exit 1
+fi
+
+ECR_REPO="$1"
+TAG="$2"
+IMAGE="${ECR_REPO}:${TAG}"
+
+export DOCKER_BUILDKIT=1
+export BUILDX_NO_DEFAULT_ATTESTATIONS=1
+
+PLATFORM="${PLATFORM:-linux/arm64}"
+
+docker buildx build \
+  --platform "${PLATFORM}" \
+  --provenance=false \
+  --sbom=false \
+  --tag "${IMAGE}" \
+  --push \
+  .
+
+echo "Pushed ${IMAGE} without build attestations"

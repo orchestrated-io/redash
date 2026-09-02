@@ -7,7 +7,7 @@ on:
     branches:
       - master
 env:
-  NODE_VERSION: 18
+  NODE_VERSION: 20
   YARN_VERSION: 1.22.22
 jobs:
   backend-lint:
@@ -22,8 +22,8 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
-      - run: sudo pip install black==23.1.0 ruff==0.0.287
+          python-version: '3.14'
+      - run: sudo pip install black==25.11.0 ruff==0.0.287
       - run: ruff check .
       - run: black --check .
 
