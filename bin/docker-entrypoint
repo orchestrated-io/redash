@@ -81,7 +81,7 @@ tests() {
   else
     TEST_ARGS=$@
   fi
-  exec pytest $TEST_ARGS
+  exec python -m pytest $TEST_ARGS
 }
 
 case "$1" in

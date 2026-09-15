@@ -31,7 +31,7 @@ const defaultProps = {
   },
 };
 
-function getWrapper(schedule = {}, { onConfirm, onCancel, ...props } = {}) {
+function getWrapper(schedule = {}, { onConfirm, onCancel, attachTo, ...props } = {}) {
   onConfirm = onConfirm || (() => {});
   onCancel = onCancel || (() => {});
 
@@ -54,7 +54,8 @@ function getWrapper(schedule = {}, { onConfirm, onCancel, ...props } = {}) {
     },
   };
 
-  return [mount(<ScheduleDialog.Component {...props} />), props];
+  const mountOptions = attachTo ? { attachTo } : {};
+  return [mount(<ScheduleDialog.Component {...props} />, mountOptions), props];
 }
 
 function findByTestID(wrapper, id) {
@@ -209,27 +210,32 @@ describe("ScheduleDialog", () => {
   describe("Adheres to user permissions", () => {
     test("Shows correct interval options", () => {
       const refreshOptions = [60, 300, 3600, 7200]; // 1 min, 1 hour
-      const [wrapper] = getWrapper(null, { refreshOptions });
+      const attachTo = document.createElement("div");
+      document.body.appendChild(attachTo);
 
-      // click select
-      findByTestID(wrapper, "interval")
-        .find(".ant-select")
-        .simulate("click");
+      const [wrapper] = getWrapper(null, { refreshOptions, attachTo });
 
-      // get dropdown menu items
-      const options = mount(
-        wrapper
-          .find("Trigger")
-          .instance()
-          .getComponent()
-      ).find(".ant-select-item-option-content");
+      try {
+        // Open dropdown (rc-select listens on the selector; portals render to document.body).
+        findByTestID(wrapper, "interval")
+          .find(".ant-select")
+          .find(".ant-select-selector")
+          .simulate("mousedown");
+        wrapper.update();
 
-      const texts = options.map(node => node.text());
-      const expected = ["Never", "1 minute", "5 minutes", "1 hour", "2 hours"];
+        const nodes = document.querySelectorAll(
+          ".ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option-content"
+        );
+        const texts = Array.from(nodes).map(el => el.textContent.trim());
+        const expected = ["Never", "1 minute", "5 minutes", "1 hour", "2 hours"];
 
-      // eslint-disable-next-line jest/prefer-to-have-length
-      expect(options.length).toEqual(expected.length);
-      expect(texts).toEqual(expected);
+        expect(texts.length).toEqual(expected.length);
+        expect(texts).toEqual(expected);
+      } finally {
+        wrapper.unmount();
+        document.body.removeChild(attachTo);
+        document.querySelectorAll(".ant-select-dropdown").forEach(el => el.remove());
+      }
     });
   });
 
