@@ -1,5 +1,23 @@
 FROM node:20-trixie AS frontend-builder
 
+# ECR scans all image layers; refresh OS packages in the Node build stage too.
+RUN set -eux; \
+  printf 'deb http://deb.debian.org/debian-security trixie-security main\n' \
+    > /etc/apt/sources.list.d/trixie-security.list; \
+  printf 'deb http://deb.debian.org/debian trixie-updates main\n' \
+    > /etc/apt/sources.list.d/trixie-updates.list; \
+  apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-security upgrade && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-updates upgrade && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
+  printf 'deb http://deb.debian.org/debian sid main\n' > /etc/apt/sources.list.d/sid.list && \
+  printf 'Package: *\nPin: release a=sid\nPin-Priority: 100\n\nPackage: zlib1g\nPin: release a=sid\nPin-Priority: 1001\n' \
+    > /etc/apt/preferences.d/sid-zlib.pref && \
+  apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t sid install zlib1g && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y install --only-upgrade gzip libpcre2-8-0 && \
+  apt-get clean && rm -rf /var/lib/apt/lists/*
+
 RUN npm install --global --force yarn@1.22.22
 
 # Controls whether to build the frontend assets
@@ -64,10 +82,11 @@ RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-updates upgrade && \
   DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
   printf 'deb http://deb.debian.org/debian sid main\n' > /etc/apt/sources.list.d/sid.list && \
-  printf 'Package: *\nPin: release a=sid\nPin-Priority: 100\n\nPackage: libc6 libc-bin libc-gconv-modules-extra\nPin: release a=sid\nPin-Priority: 1001\n' \
+  printf 'Package: *\nPin: release a=sid\nPin-Priority: 100\n\nPackage: libc6 libc-bin libc-gconv-modules-extra zlib1g\nPin: release a=sid\nPin-Priority: 1001\n' \
     > /etc/apt/preferences.d/sid-glibc.pref && \
   apt-get update && \
-  DEBIAN_FRONTEND=noninteractive apt-get -y -t sid install libc6 libc-bin && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t sid install libc6 libc-bin zlib1g && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y install --only-upgrade gzip libpcre2-8-0 && \
   apt-get install -y --no-install-recommends \
   pkg-config \
   curl \
@@ -134,10 +153,11 @@ RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get -y -t trixie-updates upgrade && \
   DEBIAN_FRONTEND=noninteractive apt-get -y upgrade && \
   printf 'deb http://deb.debian.org/debian sid main\n' > /etc/apt/sources.list.d/sid.list && \
-  printf 'Package: *\nPin: release a=sid\nPin-Priority: 100\n\nPackage: libc6 libc-bin libc-gconv-modules-extra\nPin: release a=sid\nPin-Priority: 1001\n' \
+  printf 'Package: *\nPin: release a=sid\nPin-Priority: 100\n\nPackage: libc6 libc-bin libc-gconv-modules-extra zlib1g\nPin: release a=sid\nPin-Priority: 1001\n' \
     > /etc/apt/preferences.d/sid-glibc.pref && \
   apt-get update && \
-  DEBIAN_FRONTEND=noninteractive apt-get -y -t sid install libc6 libc-bin && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y -t sid install libc6 libc-bin zlib1g && \
+  DEBIAN_FRONTEND=noninteractive apt-get -y install --only-upgrade gzip libpcre2-8-0 && \
   apt-get install -y --no-install-recommends \
   libpq5 \
   xmlsec1 && \
