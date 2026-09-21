@@ -33,7 +33,7 @@ function getUserAgentDataSummary() {
     return null;
   }
   try {
-    const brands = uad.brands.map(b => `${b.brand} ${b.version}`).join(", ");
+    const brands = uad.brands.map((b) => `${b.brand} ${b.version}`).join(", ");
     return {
       brands,
       mobile: uad.mobile,
@@ -76,8 +76,8 @@ function getMetaCspDirectives() {
     'meta[http-equiv="Content-Security-Policy-Report-Only"]',
   ];
   const out = [];
-  selectors.forEach(sel => {
-    document.querySelectorAll(sel).forEach(meta => {
+  selectors.forEach((sel) => {
+    document.querySelectorAll(sel).forEach((meta) => {
       const content = meta.getAttribute("content");
       out.push({
         httpEquiv: meta.getAttribute("http-equiv"),
@@ -94,7 +94,7 @@ function getMetaCspDirectives() {
 }
 
 function storageAvailability() {
-  const tryStorage = name => {
+  const tryStorage = (name) => {
     try {
       const s = window[name];
       if (!s) {
