@@ -1,3 +1,5 @@
+import datetime
+
 from mock import Mock, patch
 from rq import Connection
 from rq.exceptions import NoSuchJobError
@@ -10,6 +12,8 @@ from redash.tasks.queries.execution import (
     enqueue_query,
     execute_query,
 )
+from redash.tasks.queries.maintenance import cleanup_query_results
+from redash.utils import utcnow
 from tests import BaseTestCase
 
 
@@ -315,3 +319,19 @@ class QueryExecutorTests(BaseTestCase):
             )
             q = models.Query.get_by_id(q.id)
             self.assertEqual(q.schedule_failures, 0)
+
+
+class TestCleanupQueryResults(BaseTestCase):
+    def test_deletes_unused_query_results(self):
+        two_weeks_ago = utcnow() - datetime.timedelta(days=14)
+        used_qr = self.factory.create_query_result()
+        self.factory.create_query(latest_query_data=used_qr)
+        unused_qr = self.factory.create_query_result(retrieved_at=two_weeks_ago)
+        models.db.session.flush()
+        used_qr_id = used_qr.id
+        unused_qr_id = unused_qr.id
+
+        cleanup_query_results()
+
+        self.assertEqual(1, models.QueryResult.query.filter_by(id=used_qr_id).count())
+        self.assertEqual(0, models.QueryResult.query.filter_by(id=unused_qr_id).count())
