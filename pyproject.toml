@@ -84,7 +84,7 @@ dependencies = [
 ]
 
 [tool.black]
-target-version = ['py38']
+target-version = ['py314']
 line-length = 119
 force-exclude = '''
 /(
@@ -93,6 +93,9 @@ force-exclude = '''
 '''
 
 [dependency-groups]
+athena = [
+    "pyathena==2.25.2",
+]
 all_ds = [
     "atsd-client==3.0.5",
     "azure-core>=1.38.0",

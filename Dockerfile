@@ -39,61 +39,22 @@ RUN --mount=type=cache,id=pnpm-store,target=/frontend/.cache/pnpm,uid=1001,gid=1
   fi
 EOF
 
-FROM python:3.13-slim-bookworm
-
-EXPOSE 5000
+FROM python:3.13-slim-bookworm AS python-builder
 
 RUN useradd --create-home redash
 
-# Ubuntu packages
+# Install build dependencies
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   pkg-config \
   curl \
-  gnupg \
   build-essential \
-  pwgen \
-  libffi-dev \
-  sudo \
   git-core \
-  # Kerberos, needed for MS SQL Python driver to compile on arm64
-  libkrb5-dev \
-  # Postgres client
+  libffi-dev \
   libpq-dev \
-  # ODBC support:
-  g++ unixodbc-dev \
-  # for SAML
-  xmlsec1 \
-  # Additional packages required for data sources:
-  libssl-dev \
-  default-libmysqlclient-dev \
-  freetds-dev \
-  libsasl2-dev \
-  unzip \
-  libsasl2-modules-gssapi-mit && \
+  libssl-dev && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
-
-
-ARG TARGETPLATFORM
-ARG databricks_odbc_driver_url=https://databricks-bi-artifacts.s3.us-east-2.amazonaws.com/simbaspark-drivers/odbc/2.6.26/SimbaSparkODBC-2.6.26.1045-Debian-64bit.zip
-RUN <<EOF
-  if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
-    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-    curl https://packages.microsoft.com/config/debian/12/prod.list > /etc/apt/sources.list.d/mssql-release.list
-    apt-get update
-    ACCEPT_EULA=Y apt-get install  -y --no-install-recommends msodbcsql18
-    apt-get clean
-    rm -rf /var/lib/apt/lists/*
-    curl "$databricks_odbc_driver_url" --location --output /tmp/simba_odbc.zip
-    chmod 600 /tmp/simba_odbc.zip
-    unzip /tmp/simba_odbc.zip -d /tmp/simba
-    dpkg -i /tmp/simba/*.deb
-    printf "[Simba]\nDriver = /opt/simba/spark/lib/64/libsparkodbc_sb64.so" >> /etc/odbcinst.ini
-    rm /tmp/simba_odbc.zip
-    rm -rf /tmp/simba
-  fi
-EOF
 
 WORKDIR /app
 
@@ -111,6 +72,7 @@ COPY pyproject.toml uv.lock ./
 ARG UV_OPTIONS="--frozen --no-install-project --no-default-groups"
 # for LDAP authentication, install with the `ldap3` group
 # disabled by default due to GPL license conflict
+# For athena-only image, set install_groups="main,athena"
 ARG install_groups="main,all_ds,dev"
 # Translate the comma-separated install_groups list into uv flags. "main"
 # refers to the project's base dependencies (always installed); every other
@@ -125,8 +87,32 @@ RUN --mount=type=cache,target=/root/.cache/uv <<EOF
   uv sync $UV_OPTIONS $group_flags
 EOF
 
+FROM python:3.13-slim-bookworm
+
+EXPOSE 5000
+
+RUN useradd --create-home redash
+
+# Runtime OS packages only (build tools stay in python-builder).
+# For athena-only, install only libpq5 and xmlsec1
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends \
+  libpq5 \
+  xmlsec1 && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=python-builder /usr/local /usr/local
+
+# For athena-only images, restrict query runners
+ENV REDASH_ENABLED_QUERY_RUNNERS=redash.query_runner.athena,redash.query_runner.query_results
+
 COPY --chown=redash . /app
 COPY --from=frontend-builder --chown=redash /frontend/client/dist /app/client/dist
+# Frontend lockfiles are build-only; drop them so Inspector does not flag devDependency CVEs.
+RUN rm -f /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml /app/viz-lib/package.json
 RUN chown redash /app
 USER redash
 

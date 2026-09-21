@@ -117,7 +117,7 @@ export class Query {
       }
     } else if (this.latest_query_data_id && maxAge !== 0) {
       if (!this.queryResult) {
-        this.queryResult = QueryResult.getById(this.id, this.latest_query_data_id);
+        this.queryResult = QueryResult.getById(this.id, this.latest_query_data_id, true);
       }
     } else {
       this.queryResult = execute();
@@ -171,7 +171,7 @@ export class Query {
     return url;
   }
 
-  getQueryResultPromise() {
+  getQueryResultPromises() {
     return this.getQueryResult().toPromise();
   }
 
@@ -350,7 +350,7 @@ export class QueryResultError {
   }
 
   toPromise() {
-    return Promise.reject(this);
+    return [Promise.reject(this)];
   }
 
   // eslint-disable-next-line class-methods-use-this

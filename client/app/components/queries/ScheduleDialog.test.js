@@ -1,7 +1,6 @@
 import React from "react";
 import { mount } from "enzyme";
 import moment from "moment";
-import { durationHumanize } from "@/lib/utils";
 import ScheduleDialog, { TimeEditor } from "./ScheduleDialog";
 import RefreshScheduleDefault from "../proptypes";
 
@@ -32,7 +31,7 @@ const defaultProps = {
   },
 };
 
-function getWrapper(schedule = {}, { onConfirm, onCancel, ...props } = {}) {
+function getWrapper(schedule = {}, { onConfirm, onCancel, attachTo, ...props } = {}) {
   onConfirm = onConfirm || (() => {});
   onCancel = onCancel || (() => {});
 
@@ -55,7 +54,8 @@ function getWrapper(schedule = {}, { onConfirm, onCancel, ...props } = {}) {
     },
   };
 
-  return [mount(<ScheduleDialog.Component {...props} />), props];
+  const mountOptions = attachTo ? { attachTo } : {};
+  return [mount(<ScheduleDialog.Component {...props} />, mountOptions), props];
 }
 
 function findByTestID(wrapper, id) {
@@ -198,26 +198,30 @@ describe("ScheduleDialog", () => {
 
   describe("Adheres to user permissions", () => {
     test("Shows correct interval options", () => {
-      const refreshOptions = [60, 300, 3600, 7200]; // 1 min, 5 min, 1 hour, 2 hours
-      const [wrapper] = getWrapper(null, { refreshOptions });
+      const refreshOptions = [60, 300, 3600, 7200]; // 1 min, 1 hour
+      const attachTo = document.createElement("div");
+      document.body.appendChild(attachTo);
 
-      // Get the ScheduleDialog component instance and verify its computed intervals
-      const component = wrapper.find("ScheduleDialog").instance();
-      const intervals = component.intervals;
+      const [wrapper] = getWrapper(null, { refreshOptions, attachTo });
 
-      // Flatten all interval options to [label, seconds] pairs, prepend "Never"
-      const allOptions = ["Never"];
-      Object.keys(intervals)
-        .filter((key) => intervals[key].length > 0)
-        .forEach((key) => {
-          intervals[key].forEach(([, secs]) => {
-            allOptions.push(durationHumanize(secs));
-          });
-        });
+      try {
+        // Open dropdown (rc-select listens on the selector; portals render to document.body).
+        findByTestID(wrapper, "interval").find(".ant-select").find(".ant-select-selector").simulate("mousedown");
+        wrapper.update();
 
-      const expected = ["Never", "1 minute", "5 minutes", "1 hour", "2 hours"];
+        const nodes = document.querySelectorAll(
+          ".ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option-content"
+        );
+        const texts = Array.from(nodes).map((el) => el.textContent.trim());
+        const expected = ["Never", "1 minute", "5 minutes", "1 hour", "2 hours"];
 
-      expect(allOptions).toEqual(expected);
+        expect(texts.length).toEqual(expected.length);
+        expect(texts).toEqual(expected);
+      } finally {
+        wrapper.unmount();
+        document.body.removeChild(attachTo);
+        document.querySelectorAll(".ant-select-dropdown").forEach((el) => el.remove());
+      }
     });
   });
 
