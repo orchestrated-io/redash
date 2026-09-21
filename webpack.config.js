@@ -86,7 +86,7 @@ const config = {
   node: {
   },
   resolve: {
-    symlinks: false,
+    symlinks: true,
     extensions: [".js", ".jsx", ".ts", ".tsx"],
     alias: {
       "@": appPath,
@@ -200,11 +200,7 @@ const config = {
       {
         test: /\.html$/,
         exclude: [/node_modules/, /index\.html/, /multi_org\.html/],
-        use: [
-          {
-            loader: "raw-loader"
-          }
-        ]
+        type: "asset/source"
       },
       {
         test: /\.css$/,

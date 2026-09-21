@@ -328,8 +328,10 @@ class TestCleanupQueryResults(BaseTestCase):
         self.factory.create_query(latest_query_data=used_qr)
         unused_qr = self.factory.create_query_result(retrieved_at=two_weeks_ago)
         models.db.session.flush()
+        used_qr_id = used_qr.id
+        unused_qr_id = unused_qr.id
 
         cleanup_query_results()
 
-        self.assertEqual(1, models.QueryResult.query.filter_by(id=used_qr.id).count())
-        self.assertEqual(0, models.QueryResult.query.filter_by(id=unused_qr.id).count())
+        self.assertEqual(1, models.QueryResult.query.filter_by(id=used_qr_id).count())
+        self.assertEqual(0, models.QueryResult.query.filter_by(id=unused_qr_id).count())

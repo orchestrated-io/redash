@@ -145,7 +145,6 @@ def cleanup_query_results():
     else:
         deleted_count = 0
     models.db.session.commit()
-    models.db.session.expire_all()
     logger.info("Deleted %d unused query results.", deleted_count)
 
 
