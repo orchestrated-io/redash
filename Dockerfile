@@ -72,8 +72,9 @@ COPY pyproject.toml uv.lock ./
 ARG UV_OPTIONS="--frozen --no-install-project --no-default-groups"
 # for LDAP authentication, install with the `ldap3` group
 # disabled by default due to GPL license conflict
-# For athena-only image, set install_groups="main,athena"
-ARG install_groups="main,all_ds,dev"
+# For athena-only image, use install_groups="main,athena"
+# For all data sources, use install_groups="main,all_ds,dev"
+ARG install_groups="main,athena"
 # Translate the comma-separated install_groups list into uv flags. "main"
 # refers to the project's base dependencies (always installed); every other
 # entry maps to a uv dependency group.
