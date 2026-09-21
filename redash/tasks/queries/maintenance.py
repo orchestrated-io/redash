@@ -133,10 +133,10 @@ def cleanup_query_results():
     )
 
     unused_ids = [
-        row[0]
-        for row in models.QueryResult.unused(settings.QUERY_RESULTS_CLEANUP_MAX_AGE)
-        .limit(settings.QUERY_RESULTS_CLEANUP_COUNT)
-        .with_entities(models.QueryResult.id)
+        query_result.id
+        for query_result in models.QueryResult.unused(settings.QUERY_RESULTS_CLEANUP_MAX_AGE).limit(
+            settings.QUERY_RESULTS_CLEANUP_COUNT
+        )
     ]
     if unused_ids:
         deleted_count = models.QueryResult.query.filter(models.QueryResult.id.in_(unused_ids)).delete(
@@ -145,6 +145,7 @@ def cleanup_query_results():
     else:
         deleted_count = 0
     models.db.session.commit()
+    models.db.session.expire_all()
     logger.info("Deleted %d unused query results.", deleted_count)
 
 

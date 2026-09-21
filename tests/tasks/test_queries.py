@@ -331,5 +331,5 @@ class TestCleanupQueryResults(BaseTestCase):
 
         cleanup_query_results()
 
-        self.assertIsNotNone(models.QueryResult.query.get(used_qr.id))
-        self.assertIsNone(models.QueryResult.query.get(unused_qr.id))
+        self.assertEqual(1, models.QueryResult.query.filter_by(id=used_qr.id).count())
+        self.assertEqual(0, models.QueryResult.query.filter_by(id=unused_qr.id).count())

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { compact, isEmpty, invoke, map } from "lodash";
-import { marked } from "marked";
+import { markdown } from "markdown";
 import cx from "classnames";
 import Menu from "antd/lib/menu";
 import HtmlContent from "@redash/viz/lib/components/HtmlContent";
@@ -107,7 +107,7 @@ function VisualizationWidgetHeader({
           </p>
           {!isEmpty(widget.getQuery().description) && (
             <HtmlContent className="text-muted markdown query--description">
-              {marked.parse(widget.getQuery().description || "")}
+              {markdown.toHTML(widget.getQuery().description || "")}
             </HtmlContent>
           )}
         </div>

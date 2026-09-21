@@ -286,9 +286,6 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.23
-      marked:
-        specifier: ^4.3.0
-        version: 4.3.0
       mini-css-extract-plugin:
         specifier: ^2.10.0
         version: 2.10.0(webpack@5.105.3)
@@ -5866,11 +5863,6 @@ packages:
 
   markdown@0.5.0:
     resolution: {integrity: sha512-ctGPIcuqsYoJ493sCtFK7H4UEgMWAUdXeBhPbdsg1W0LsV9yJELAHRsMmWfTgao6nH0/x5gf9FmsbxiXnrgaIQ==}
-    hasBin: true
-
-  marked@4.3.0:
-    resolution: {integrity: sha512-PRsaiG84bK+AMvxziE/lCFss8juXjNaWzVbN5tXAm4XjeaS9NAHhop+PjQxz2A9h8Q4M/xGmzP8vqNwy6JeK0A==}
-    engines: {node: '>= 12'}
     hasBin: true
 
   material-design-iconic-font@2.2.0:
@@ -15306,8 +15298,6 @@ snapshots:
   markdown@0.5.0:
     dependencies:
       nopt: 2.1.2
-
-  marked@4.3.0: {}
 
   material-design-iconic-font@2.2.0: {}
 
