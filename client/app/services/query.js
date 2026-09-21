@@ -175,6 +175,10 @@ export class Query {
     return this.getQueryResult().toPromise();
   }
 
+  getQueryResultPromise() {
+    return this.getQueryResultPromises()[0];
+  }
+
   getParameters() {
     if (!this.$parameters) {
       this.$parameters = new Parameters(this, location.search);
