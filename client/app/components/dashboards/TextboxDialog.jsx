@@ -1,5 +1,5 @@
 import { toString } from "lodash";
-import { markdown } from "markdown";
+import { marked } from "marked";
 import React, { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useDebouncedCallback } from "use-debounce";
@@ -20,15 +20,15 @@ function TextboxDialog({ dialog, isNew, ...props }) {
 
   useEffect(() => {
     setText(props.text);
-    setPreview(markdown.toHTML(props.text));
+    setPreview(marked.parse(props.text || ""));
   }, [props.text]);
 
   const [updatePreview] = useDebouncedCallback(() => {
-    setPreview(markdown.toHTML(text));
+    setPreview(marked.parse(text || ""));
   }, 200);
 
   const handleInputChange = useCallback(
-    event => {
+    (event) => {
       setText(event.target.value);
       updatePreview();
     },
@@ -67,7 +67,8 @@ function TextboxDialog({ dialog, isNew, ...props }) {
       onCancel={confirmDialogDismiss}
       okText={isNew ? "Add to Dashboard" : "Save"}
       width={500}
-      wrapProps={{ "data-test": "TextboxDialog" }}>
+      wrapProps={{ "data-test": "TextboxDialog" }}
+    >
       <div className="textbox-dialog">
         <Input.TextArea
           className="resize-vertical"
@@ -83,7 +84,8 @@ function TextboxDialog({ dialog, isNew, ...props }) {
           <Link
             target="_blank"
             rel="noopener noreferrer"
-            href="https://www.markdownguide.org/cheat-sheet/#basic-syntax">
+            href="https://www.markdownguide.org/cheat-sheet/#basic-syntax"
+          >
             <Tooltip title="Markdown guide opens in new window">Markdown</Tooltip>
           </Link>
           .

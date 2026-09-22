@@ -1,5 +1,6 @@
 @icomoon-font-family: "redash-icons";
-@icomoon-font-path: "fonts";
+// Leading ./ so css-loader resolves these as file URLs, not bare specifiers (webpack 5).
+@icomoon-font-path: "./fonts";
 
 @icon-flash-off: "\e900";
 @icon-flash: "\e901";
