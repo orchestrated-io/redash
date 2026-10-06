@@ -2,7 +2,7 @@ x-redash-service: &redash-service
   build:
     context: ../
     args:
-      install_groups: "main"
+      install_groups: "main,athena"
       code_coverage: ${CODE_COVERAGE}
 x-redash-environment: &redash-environment
   REDASH_LOG_LEVEL: "INFO"
@@ -12,6 +12,7 @@ x-redash-environment: &redash-environment
   REDASH_RATELIMIT_ENABLED: "false"
   REDASH_ENFORCE_CSRF: "true"
   REDASH_COOKIE_SECRET: "2H9gNG9obnAQ9qnR9BDTQUph6CbXKCzF"
+  REDASH_ENABLED_QUERY_RUNNERS: "redash.query_runner.athena,redash.query_runner.query_results,redash.query_runner.sqlite"
 services:
   server:
     <<: *redash-service

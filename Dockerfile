@@ -111,8 +111,9 @@ COPY pyproject.toml uv.lock ./
 ARG UV_OPTIONS="--frozen --no-install-project --no-default-groups"
 # for LDAP authentication, install with the `ldap3` group
 # disabled by default due to GPL license conflict
-# Slim Athena-only image: install_groups="main,athena"
-ARG install_groups="main,all_ds,dev"
+# Default is Athena-only. Restore all data sources with:
+#   --build-arg install_groups="main,all_ds,dev"
+ARG install_groups="main,athena"
 # Translate the comma-separated install_groups list into uv flags. "main"
 # refers to the project's base dependencies (always installed); every other
 # entry maps to a uv dependency group.
@@ -125,6 +126,8 @@ RUN --mount=type=cache,target=/root/.cache/uv <<EOF
   done
   uv sync $UV_OPTIONS $group_flags
 EOF
+
+ENV REDASH_ENABLED_QUERY_RUNNERS=redash.query_runner.athena,redash.query_runner.query_results
 
 COPY --chown=redash . /app
 COPY --from=frontend-builder --chown=redash /frontend/client/dist /app/client/dist

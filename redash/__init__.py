@@ -21,9 +21,7 @@ if os.environ.get("REMOTE_DEBUG"):
     try:
         import debugpy
     except ImportError:
-        logging.getLogger(__name__).warning(
-            "REMOTE_DEBUG is set but debugpy is not installed (install the dev Poetry group)"
-        )
+        logging.getLogger(__name__).warning("REMOTE_DEBUG is set but debugpy is not installed (install the dev group)")
     else:
         debugpy.listen(("0.0.0.0", 5678))
         debugpy.wait_for_client()

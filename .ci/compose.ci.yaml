@@ -14,6 +14,7 @@ services:
       POSTGRES_PASSWORD: "FmTKs5vX52ufKR1rd8tn4MoSP7zvCJwb"
       REDASH_DATABASE_URL: "postgresql://postgres:FmTKs5vX52ufKR1rd8tn4MoSP7zvCJwb@postgres/postgres"
       REDASH_COOKIE_SECRET: "2H9gNG9obnAQ9qnR9BDTQUph6CbXKCzF"
+      REDASH_ENABLED_QUERY_RUNNERS: "redash.query_runner.athena,redash.query_runner.query_results,redash.query_runner.sqlite"
   redis:
     image: redis:7-alpine
     restart: unless-stopped

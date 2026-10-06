@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - master
+      - release/26.9-athena-only
   pull_request:
     branches:
       - master
+      - release/26.9-athena-only
 env:
   NODE_VERSION: 24
   PNPM_VERSION: 10.30.3
@@ -46,7 +48,7 @@ jobs:
       - name: Build Docker Images
         run: |
           set -x
-          docker compose build --build-arg install_groups="main,all_ds,dev" --build-arg skip_frontend_build=true
+          docker compose build --build-arg install_groups="main,athena,dev" --build-arg skip_frontend_build=true
           docker compose up -d
           sleep 10
       - name: Create Test Database
