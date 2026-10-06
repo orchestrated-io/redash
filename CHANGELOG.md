@@ -1,5 +1,9 @@
 # Change Log
 
+## 26.9.0+athena2 (TeamForm)
+
+Security dependency refresh (urllib3 2.8, msgpack 1.2.1, pnpm overrides for lodash, flatted, transitive axios, and related npm CVEs). Same TeamForm fork as athena1: partial query-result loading, SAML server/browser diagnostics, Unicode export filenames, Flask 3 stack, Athena-only default install — without the removed `TEAMFORM_ADMIN_EMAIL` login bypass.
+
 ## 26.9.0+athena1 (TeamForm)
 
 TeamForm fork of upstream Redash 26.9.0: Flask 3 / SQLAlchemy 1.4 runtime, Athena-only query-runner install by default, and TeamForm SAML, query-result, and Docker changes. Override Docker with `--build-arg install_groups="main,all_ds,dev"` to restore the full data-source set.

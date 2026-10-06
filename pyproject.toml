@@ -1,6 +1,6 @@
 [project]
 name = "redash"
-version = "26.9.0+athena1"
+version = "26.9.0+athena2"
 description = "Make Your Company Data Driven. Connect to any data source, easily visualize, dashboard and share your data."
 authors = [
     { name = "Arik Fraimovich", email = "<arik@redash.io>" }
@@ -73,7 +73,8 @@ dependencies = [
     "supervisor==4.3.0",
     "supervisor-checks==0.8.1",
     "ua-parser==0.18.0",
-    "urllib3==2.7.0",
+    "msgpack==1.2.1",
+    "urllib3==2.8.0",
     "user-agents==2.0",
     "werkzeug==3.1.6",
     "wtforms==2.2.1",
