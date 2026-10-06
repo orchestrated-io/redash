@@ -2283,7 +2283,7 @@ wheels = [
 
 [[package]]
 name = "redash"
-version = "26.9.0"
+version = "26.9.0+athena1"
 source = { virtual = "." }
 dependencies = [
     { name = "aniso8601" },
