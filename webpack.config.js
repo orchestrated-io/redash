@@ -69,11 +69,18 @@ const config = {
       "./client/app/assets/less/main.less",
       "./client/app/assets/less/ant.less"
     ],
-    server: ["./client/app/assets/less/server.less"]
+    server: ["./client/app/assets/less/server.less"],
+    // Fixed filename for server-rendered login.html (SAML console diagnostics).
+    samlBrowserDebug: "./client/app/saml-browser-debug.entry.js"
   },
   output: {
     path: path.join(basePath, "./dist"),
-    filename: isProduction ? "[name].[chunkhash].js" : "[name].js",
+    filename: pathData => {
+      if (pathData.chunk.name === "samlBrowserDebug") {
+        return "saml-browser-debug.js";
+      }
+      return isProduction ? "[name].[chunkhash].js" : "[name].js";
+    },
     publicPath: staticPath
   },
   node: {
@@ -95,13 +102,14 @@ const config = {
     }
   },
   plugins: [
-    new WebpackBuildNotifierPlugin({ title: "Redash" }),
+    // Desktop notifications break or stall headless builds (Docker, CI); production never needs them.
+    isDevelopment && new WebpackBuildNotifierPlugin({ title: "Redash" }),
     // bundle only default `moment` locale (`en`)
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),
     new HtmlWebpackPlugin({
       template: "./client/app/index.html",
       filename: "index.html",
-      excludeChunks: ["server"],
+      excludeChunks: ["server", "samlBrowserDebug"],
       release: process.env.BUILD_VERSION || "dev",
       staticPath,
       baseHref,
@@ -110,7 +118,7 @@ const config = {
     new HtmlWebpackPlugin({
       template: "./client/app/multi_org.html",
       filename: "multi_org.html",
-      excludeChunks: ["server"]
+      excludeChunks: ["server", "samlBrowserDebug"]
     }),
     isProduction &&
       new MiniCssExtractPlugin({
@@ -125,8 +133,15 @@ const config = {
         { from: "client/app/assets/robots.txt" },
         { from: "client/app/unsupported.html" },
         { from: "client/app/unsupportedRedirect.js" },
+        // copy-webpack-plugin v9+: use [name][ext] instead of removed `flatten`
         { from: "client/app/assets/css/*.css", to: "styles/[name][ext]" },
-        { from: "client/app/assets/fonts", to: "fonts/" }
+        { from: "client/app/assets/fonts", to: "fonts/" },
+        // Hard-coded /static/images/<subdir>/… URLs (db-logos, illustrations, etc.) must exist
+        // at stable paths. Webpack's asset/resource rule only emits hashed files under images/.
+        { from: "client/app/assets/images/db-logos", to: "images/db-logos" },
+        { from: "client/app/assets/images/illustrations", to: "images/illustrations" },
+        { from: "client/app/assets/images/fixtures", to: "images/fixtures" },
+        { from: "client/app/assets/images/destinations", to: "images/destinations" },
       ],
     }),
     isHotReloadingEnabled && new ReactRefreshWebpackPlugin({ overlay: false }),
@@ -147,6 +162,10 @@ const config = {
   optimization: {
     splitChunks: {
       chunks: chunk => {
+        // Keep SAML login diagnostics in one file (login.html loads only saml-browser-debug.js).
+        if (chunk.name === "samlBrowserDebug") {
+          return false;
+        }
         return chunk.name != "server";
       }
     }
@@ -209,7 +228,8 @@ const config = {
               sourceMap: false,
               lessOptions: {
                 plugins: [
-                  new LessPluginAutoPrefix({ browsers: ["last 3 versions"] })
+                  // Uses browserslist from package.json (Autoprefixer 10+ no longer accepts `browsers`).
+                  new LessPluginAutoPrefix()
                 ],
                 javascriptEnabled: true
               }
@@ -221,22 +241,14 @@ const config = {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         type: "asset/resource",
         generator: {
-          filename: (pathData) => {
-            const filePath = pathData.filename || "";
-            // Strip source prefix so assets/images/db-logos/foo.png → db-logos/foo.png
-            const m = filePath.match(/assets\/images\/(.*)/);
-            if (m) return `images/${m[1]}`;
-            // For images from node_modules or elsewhere, flatten to avoid deep paths
-            const parts = filePath.split("/");
-            return `images/${parts[parts.length - 1]}`;
-          }
+          filename: "images/[name].[contenthash:8][ext]"
         }
       },
       {
         test: /\.geo\.json$/,
         type: "asset/resource",
         generator: {
-          filename: "data/[hash:7].[name][ext]"
+          filename: "data/[contenthash:7].[name][ext]"
         }
       },
       {
@@ -248,7 +260,7 @@ const config = {
           }
         },
         generator: {
-          filename: "fonts/[name].[hash:7][ext]"
+          filename: "fonts/[name].[contenthash:7][ext]"
         }
       }
     ]

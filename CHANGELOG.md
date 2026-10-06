@@ -1,5 +1,9 @@
 # Change Log
 
+## 26.9.0+athena1 (TeamForm)
+
+TeamForm fork of upstream Redash 26.9.0: Flask 3 / SQLAlchemy 1.4 runtime, Athena-only query-runner install by default, and TeamForm SAML, query-result, and Docker changes. Override Docker with `--build-arg install_groups="main,all_ds,dev"` to restore the full data-source set.
+
 ## 26.9.0
 
 Redash v26.9.0 includes important security fixes, a new Cloudflare D1 data source, improvements to number formatting and query runners, and updated dependencies and build tooling.

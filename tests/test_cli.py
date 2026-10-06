@@ -17,7 +17,7 @@ class DataSourceCommandTests(BaseTestCase):
         result = runner.invoke(
             manager,
             ["ds", "new"],
-            input="test\n%s\n\n\nexample.com\n\n\ntestdb\n" % (pg_i,),
+            input="test\n%s\n\n\nexample.com\n\n\ntestdb\n\n\n\n\n\n" % (pg_i,),
         )
         self.assertFalse(result.exception)
         self.assertEqual(result.exit_code, 0)
@@ -102,17 +102,17 @@ class DataSourceCommandTests(BaseTestCase):
         Id: 3
         Name: Atest
         Type: sqlite
-        Options: {"dbpath": "/tmp/test.db"}
+        Options: {"dbpath":"/tmp/test.db"}
         --------------------
         Id: 1
         Name: test1
         Type: pg
-        Options: {"dbname": "testdb1", "host": "example.com"}
+        Options: {"dbname":"testdb1","host":"example.com"}
         --------------------
         Id: 2
         Name: test2
         Type: sqlite
-        Options: {"dbpath": "/tmp/test.db"}
+        Options: {"dbpath":"/tmp/test.db"}
         """
         self.assertMultiLineEqual(result.output, textwrap.dedent(expected_output).lstrip())
 

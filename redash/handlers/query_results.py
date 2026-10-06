@@ -1,3 +1,4 @@
+import logging
 import unicodedata
 from urllib.parse import quote
 
@@ -40,6 +41,25 @@ from redash.utils import (
     json_dumps,
     to_filename,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def _require_query_results_source_access(query_result, current_user):
+    if not (query_result.data_source and query_result.data_source.type == "results"):
+        return
+    query_ids = set(
+        extract_query_ids(query_result.query_text)
+        + extract_cached_query_ids(query_result.query_text)
+        + [int(p[0]) for p in extract_query_params(query_result.query_text)]
+    )
+    for qid in query_ids:
+        try:
+            source_query = models.Query.get_by_id(qid)
+            if source_query.data_source:
+                require_access(source_query.data_source, current_user, view_only)
+        except models.NoResultFound:
+            abort(403, message="Access denied - referenced query no longer exists.")
 
 
 def error_response(message, http_status=400):
@@ -130,19 +150,25 @@ def get_download_filename(query_result, query, filetype):
 
 
 def content_disposition_filenames(attachment_filename):
+    logger.info(
+        f"content_disposition_filenames called with: {attachment_filename} (type: {type(attachment_filename)})"
+    )
     if not isinstance(attachment_filename, str):
         attachment_filename = attachment_filename.decode("utf-8")
 
     try:
-        attachment_filename = attachment_filename.encode("ascii")
+        # Test if we can encode as ASCII, but don't actually encode
+        attachment_filename.encode("ascii")
+        # If we can encode as ASCII, use the original string
+        filenames = {"filename": attachment_filename}
     except UnicodeEncodeError:
+        # If we can't encode as ASCII, provide both filename and filename* for RFC 6266 compliance
         filenames = {
-            "filename": unicodedata.normalize("NFKD", attachment_filename).encode("ascii", "ignore"),
+            "filename": unicodedata.normalize("NFKD", attachment_filename).encode("ascii", "ignore").decode("ascii"),
             "filename*": "UTF-8''%s" % quote(attachment_filename, safe=b""),
         }
-    else:
-        filenames = {"filename": attachment_filename}
 
+    logger.info(f"content_disposition_filenames returning: {filenames}")
     return filenames
 
 
@@ -316,6 +342,8 @@ class QueryResultResource(BaseResource):
         # should check for query parameters and shouldn't cache the result).
         should_cache = query_result_id is not None
 
+        partial = request.args.get("partial") == "true"
+
         query_result = None
         query = None
 
@@ -338,22 +366,7 @@ class QueryResultResource(BaseResource):
 
         if query_result:
             require_access(query_result.data_source, self.current_user, view_only)
-
-            # If the result was produced via the Query Results data source,
-            # verify access to each underlying data source referenced in the query.
-            if query_result.data_source and query_result.data_source.type == "results":
-                query_ids = set(
-                    extract_query_ids(query_result.query_text)
-                    + extract_cached_query_ids(query_result.query_text)
-                    + [int(p[0]) for p in extract_query_params(query_result.query_text)]
-                )
-                for qid in query_ids:
-                    try:
-                        source_query = models.Query.get_by_id(qid)
-                        if source_query.data_source:
-                            require_access(source_query.data_source, self.current_user, view_only)
-                    except models.NoResultFound:
-                        abort(403, message="Access denied - referenced query no longer exists.")
+            _require_query_results_source_access(query_result, self.current_user)
 
             if isinstance(self.current_user, models.ApiUser):
                 event = {
@@ -375,13 +388,15 @@ class QueryResultResource(BaseResource):
 
                 self.record_event(event)
 
-            response_builders = {
-                "json": self.make_json_response,
-                "xlsx": self.make_excel_response,
-                "csv": self.make_csv_response,
-                "tsv": self.make_tsv_response,
-            }
-            response = response_builders[filetype](query_result)
+            if filetype == "json":
+                response = self.make_json_response(query_result, partial)
+            else:
+                response_builders = {
+                    "xlsx": self.make_excel_response,
+                    "csv": self.make_csv_response,
+                    "tsv": self.make_tsv_response,
+                }
+                response = response_builders[filetype](query_result)
 
             if len(settings.ACCESS_CONTROL_ALLOW_ORIGIN) > 0:
                 self.add_cors_headers(response.headers)
@@ -400,9 +415,13 @@ class QueryResultResource(BaseResource):
             abort(404, message="No cached result found for this query.")
 
     @staticmethod
-    def make_json_response(query_result):
-        data = json_dumps({"query_result": query_result.to_dict()})
+    def make_json_response(query_result, partial):
         headers = {"Content-Type": "application/json"}
+        dict = query_result.to_dict()
+        if partial:
+            partial_rows = dict["data"]["rows"][:1000]
+            dict["data"]["rows"] = partial_rows
+        data = json_dumps({"query_result": dict})
         return make_response(data, 200, headers)
 
     @staticmethod

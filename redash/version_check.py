@@ -94,7 +94,14 @@ def get_latest_version():
 
 def _compare_and_update(latest_version):
     # TODO: support alpha channel (allow setting which channel to check & parse build number)
-    is_newer = semver.compare(current_version, latest_version) == -1
+    try:
+        is_newer = semver.compare(current_version, latest_version) == -1
+    except ValueError:
+        logging.warning(
+            "Skipping version comparison; %s is not a valid semver version",
+            current_version,
+        )
+        is_newer = False
     logging.info("Latest version: %s (newer: %s)", latest_version, is_newer)
 
     if is_newer:

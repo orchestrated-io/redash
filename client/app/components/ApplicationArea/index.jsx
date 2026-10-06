@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import routes from "@/services/routes";
+import { logAppShellLoaded } from "@/services/saml-debug-console";
 import Router from "./Router";
 import handleNavigationIntent from "./handleNavigationIntent";
 import ErrorMessage from "./ErrorMessage";
@@ -13,6 +14,10 @@ export default function ApplicationArea() {
       document.title = currentRoute.title;
     }
   }, [currentRoute]);
+
+  useEffect(() => {
+    logAppShellLoaded();
+  }, []);
 
   useEffect(() => {
     function globalErrorHandler(event) {
