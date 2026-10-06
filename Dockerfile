@@ -71,6 +71,7 @@ RUN apt-get update && \
   libsasl2-dev \
   unzip \
   libsasl2-modules-gssapi-mit && \
+  apt-get upgrade -y --no-install-recommends && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 

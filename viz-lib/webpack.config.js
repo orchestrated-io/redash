@@ -1,4 +1,4 @@
-const LessPluginAutoPrefix = require("less-plugin-autoprefix");
+const LessAutoprefixPlugin = require("../scripts/less-autoprefix-plugin");
 const path = require("path");
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -46,7 +46,7 @@ module.exports = {
             options: {
               lessOptions: {
                 // Uses browserslist from root package.json (Autoprefixer 10+ no longer accepts `browsers`).
-                plugins: [new LessPluginAutoPrefix()],
+                plugins: [new LessAutoprefixPlugin()],
                 javascriptEnabled: true,
 	      },
             },

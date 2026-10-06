@@ -1,5 +1,9 @@
 # Change Log
 
+## 26.9.0+athena3 (TeamForm)
+
+Further ECR-oriented fixes: axios 0.34.0, plotly.js 4.1.1 with maplibre-gl 6.12 (CVE-2026-85061), PostCSS 8 autoprefixer (drops less-plugin-autoprefix / PostCSS 6), and pnpm overrides for tough-cookie, brace-expansion, basic-ftp, js-yaml, and related HIGH findings. Debian security upgrades in the runtime image where available.
+
 ## 26.9.0+athena2 (TeamForm)
 
 Security dependency refresh (urllib3 2.8, msgpack 1.2.1, pnpm overrides for lodash, flatted, transitive axios, and related npm CVEs). Same TeamForm fork as athena1: partial query-result loading, SAML server/browser diagnostics, Unicode export filenames, Flask 3 stack, Athena-only default install — without the removed `TEAMFORM_ADMIN_EMAIL` login bypass.

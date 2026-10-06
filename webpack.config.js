@@ -6,7 +6,7 @@ const WebpackBuildNotifierPlugin = require("webpack-build-notifier");
 const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const LessPluginAutoPrefix = require("less-plugin-autoprefix");
+const LessAutoprefixPlugin = require("./scripts/less-autoprefix-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
@@ -229,7 +229,7 @@ const config = {
               lessOptions: {
                 plugins: [
                   // Uses browserslist from package.json (Autoprefixer 10+ no longer accepts `browsers`).
-                  new LessPluginAutoPrefix()
+                  new LessAutoprefixPlugin()
                 ],
                 javascriptEnabled: true
               }

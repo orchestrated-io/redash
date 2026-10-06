@@ -15,7 +15,7 @@ const rangeSliderIcon = {
 };
 
 Plotly.setPlotConfig({
-  modeBarButtonsToRemove: ["sendDataToCloud"],
+  modeBarButtonsToRemove: ["sendChartToCloud"],
   modeBarButtonsToAdd: [
     "togglespikelines",
     "v1hovermode",
