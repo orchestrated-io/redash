@@ -2,7 +2,7 @@
 
 ## 26.9.0+athena3 (TeamForm)
 
-Further ECR-oriented fixes: axios 0.34.0, plotly.js 4.1.1 with maplibre-gl 6.12 (CVE-2026-85061), PostCSS 8 autoprefixer (drops less-plugin-autoprefix / PostCSS 6), and pnpm overrides for tough-cookie, brace-expansion, basic-ftp, js-yaml, and related HIGH findings. Debian security upgrades in the runtime image where available.
+Further ECR-oriented fixes: axios 0.34.0, plotly.js 4.1.1 with maplibre-gl 6.12 (CVE-2026-85061), PostCSS 8.5.28 autoprefixer (drops less-plugin-autoprefix / PostCSS 6), lodash.template 4.18.1 (CVE-2026-4800), and pnpm overrides for tough-cookie, brace-expansion, basic-ftp, js-yaml, and related HIGH findings. Debian security upgrades in the runtime image where available.
 
 ## 26.9.0+athena2 (TeamForm)
 
