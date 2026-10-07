@@ -1,5 +1,9 @@
 # Change Log
 
+## 26.9.0+athena4 (TeamForm)
+
+pnpm override **proxy-addr 2.0.8** (CVE-2026-90711 CRITICAL) plus **ip-address 10.3.1** and **compression 1.8.2** for related dev-server transitive fixes.
+
 ## 26.9.0+athena3 (TeamForm)
 
 Further ECR-oriented fixes: axios 0.34.0, plotly.js 4.1.1 with maplibre-gl 6.12 (CVE-2026-85061), PostCSS 8.5.28 autoprefixer (drops less-plugin-autoprefix / PostCSS 6), lodash.template 4.18.1 (CVE-2026-4800), and pnpm overrides for tough-cookie, brace-expansion, basic-ftp, js-yaml, and related HIGH findings. Debian security upgrades in the runtime image where available.
