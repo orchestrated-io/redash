@@ -99,7 +99,7 @@ EOF
 WORKDIR /app
 
 # Install uv (pinned) from the official distroless image for a reproducible build.
-COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.15 /uv /usr/local/bin/uv
 
 # Install into the system environment rather than a project-local virtualenv,
 # so console scripts (gunicorn, supervisord, rq, ...) are on PATH.
@@ -127,6 +127,9 @@ RUN --mount=type=cache,target=/root/.cache/uv <<EOF
   done
   uv sync $UV_OPTIONS $group_flags
 EOF
+
+# pip and uv are build-time only; vendored pip deps and uv's Rust SBOM inflate scan noise.
+RUN python3 -m pip uninstall -y pip && rm -f /usr/local/bin/uv
 
 ENV REDASH_ENABLED_QUERY_RUNNERS=redash.query_runner.athena,redash.query_runner.query_results
 
