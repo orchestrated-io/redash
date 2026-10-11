@@ -175,9 +175,9 @@ class DataSource(BelongsToOrgMixin, db.Model):
 
     @classmethod
     def create_with_group(cls, *args, **kwargs):
+        """Persist a new data source. Group access is assigned explicitly (admin UI/API)."""
         data_source = cls(*args, **kwargs)
-        data_source_group = DataSourceGroup(data_source=data_source, group=data_source.org.default_group)
-        db.session.add_all([data_source, data_source_group])
+        db.session.add(data_source)
         return data_source
 
     @classmethod
