@@ -43,37 +43,37 @@ FROM python:3.13-slim-bookworm
 
 EXPOSE 5000
 
+# Used for conditional OS packages (see apt install / purge below).
+ARG install_groups="main,athena"
+
 RUN useradd --create-home redash
 
-# Ubuntu packages
-RUN apt-get update && \
+# OS packages: Athena-only images skip DB driver build deps (MariaDB client, ODBC, etc.).
+RUN <<EOF
+  set -e
+  db_build_deps=""
+  if echo "$install_groups" | tr ',' ' ' | grep -qx all_ds; then
+    db_build_deps="g++ unixodbc-dev libkrb5-dev default-libmysqlclient-dev freetds-dev libsasl2-dev libsasl2-modules-gssapi-mit"
+  fi
+  apt-get update
   apt-get install -y --no-install-recommends \
-  pkg-config \
-  curl \
-  gnupg \
-  build-essential \
-  pwgen \
-  libffi-dev \
-  sudo \
-  git-core \
-  # Kerberos, needed for MS SQL Python driver to compile on arm64
-  libkrb5-dev \
-  # Postgres client
-  libpq-dev \
-  # ODBC support:
-  g++ unixodbc-dev \
-  # for SAML
-  xmlsec1 \
-  # Additional packages required for data sources:
-  libssl-dev \
-  default-libmysqlclient-dev \
-  freetds-dev \
-  libsasl2-dev \
-  unzip \
-  libsasl2-modules-gssapi-mit && \
-  apt-get upgrade -y --no-install-recommends && \
-  apt-get clean && \
+    pkg-config \
+    curl \
+    gnupg \
+    build-essential \
+    pwgen \
+    libffi-dev \
+    sudo \
+    git-core \
+    libpq-dev \
+    xmlsec1 \
+    libssl-dev \
+    unzip \
+    ${db_build_deps}
+  apt-get upgrade -y --no-install-recommends
+  apt-get clean
   rm -rf /var/lib/apt/lists/*
+EOF
 
 
 ARG TARGETPLATFORM
@@ -114,7 +114,6 @@ ARG UV_OPTIONS="--frozen --no-install-project --no-default-groups"
 # disabled by default due to GPL license conflict
 # Default is Athena-only. Restore all data sources with:
 #   --build-arg install_groups="main,all_ds,dev"
-ARG install_groups="main,athena"
 # Translate the comma-separated install_groups list into uv flags. "main"
 # refers to the project's base dependencies (always installed); every other
 # entry maps to a uv dependency group.
@@ -130,6 +129,20 @@ EOF
 
 # pip and uv are build-time only; vendored pip deps and uv's Rust SBOM inflate scan noise.
 RUN python3 -m pip uninstall -y pip && rm -f /usr/local/bin/uv
+
+# Drop compile-only OS packages from the runtime image (gcc, *-dev, optional DB client headers).
+RUN <<EOF
+  set -e
+  purge="build-essential pkg-config libffi-dev libpq-dev libssl-dev git-core"
+  if echo "$install_groups" | tr ',' ' ' | grep -qx all_ds; then
+    purge="$purge g++ unixodbc-dev libkrb5-dev default-libmysqlclient-dev freetds-dev libsasl2-dev libsasl2-modules-gssapi-mit"
+  fi
+  apt-get update
+  apt-get purge -y --auto-remove ${purge}
+  apt-get autoremove -y --purge
+  apt-get clean
+  rm -rf /var/lib/apt/lists/*
+EOF
 
 ENV REDASH_ENABLED_QUERY_RUNNERS=redash.query_runner.athena,redash.query_runner.query_results
 
