@@ -81,7 +81,7 @@
     "@babel/core": "^7.29.0",
     "@babel/plugin-transform-class-properties": "^7.28.5",
     "@babel/plugin-transform-object-assign": "^7.27.1",
-    "@babel/preset-env": "^7.29.0",
+    "@babel/preset-env": "^7.29.5",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
     "@cypress/code-coverage": "^3.11.0",
@@ -246,7 +246,9 @@
       "postcss-selector-parser": "^7.1.6",
       "source-map-js": "^1.2.2",
       "uuid": "^11.1.0",
-      "ws": "^8.20.1"
+      "ws": "^8.20.1",
+      "@babel/plugin-transform-modules-systemjs": "^7.29.4",
+      "pdfjs-dist": "^4.2.67"
     }
   }
 }
