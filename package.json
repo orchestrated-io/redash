@@ -168,7 +168,8 @@
     ],
     "moduleNameMapper": {
       "^@/(.*)": "<rootDir>/app/$1",
-      "\\.(css|less)$": "identity-obj-proxy"
+      "\\.(css|less)$": "identity-obj-proxy",
+      "^decode-uri-component$": "<rootDir>/app/__tests__/shims/decode-uri-component.cjs"
     },
     "testPathIgnorePatterns": [
       "<rootDir>/app/__tests__/"
