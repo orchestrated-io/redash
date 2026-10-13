@@ -90,7 +90,12 @@ const config = {
     extensions: [".js", ".jsx", ".ts", ".tsx"],
     alias: {
       "@": appPath,
-      extensions: extensionPath
+      extensions: extensionPath,
+      // query-string@6 require()s this; 0.5.0 is ESM-only (see client/app/__tests__/shims/).
+      "decode-uri-component": path.resolve(
+        __dirname,
+        "client/app/__tests__/shims/decode-uri-component.cjs"
+      ),
     },
     fallback: {
       fs: false,
