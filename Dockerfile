@@ -39,7 +39,8 @@ RUN --mount=type=cache,id=pnpm-store,target=/frontend/.cache/pnpm,uid=1001,gid=1
   fi
 EOF
 
-FROM python:3.13-slim-bookworm
+# Bookworm util-linux (2.38.x) has no DSA for CVE-2026-53613/53615; Trixie ships 2.41.5+deb13u1.
+FROM python:3.13-slim-trixie
 
 EXPOSE 5000
 
@@ -81,7 +82,7 @@ ARG databricks_odbc_driver_url=https://databricks-bi-artifacts.s3.us-east-2.amaz
 RUN <<EOF
   if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
     curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-    curl https://packages.microsoft.com/config/debian/12/prod.list > /etc/apt/sources.list.d/mssql-release.list
+    curl https://packages.microsoft.com/config/debian/13/prod.list > /etc/apt/sources.list.d/mssql-release.list
     apt-get update
     ACCEPT_EULA=Y apt-get install  -y --no-install-recommends msodbcsql18
     apt-get clean
