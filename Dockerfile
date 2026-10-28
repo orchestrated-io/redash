@@ -13,6 +13,7 @@ USER redash
 
 WORKDIR /frontend
 COPY --chown=redash package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /frontend/
+COPY --chown=redash patches /frontend/patches
 COPY --chown=redash viz-lib /frontend/viz-lib
 COPY --chown=redash scripts /frontend/scripts
 
