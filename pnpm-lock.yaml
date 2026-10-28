@@ -61,6 +61,11 @@ overrides:
   fast-xml-parser: ^5.7.0
   yaml: ^2.8.3
 
+patchedDependencies:
+  deepmerge@4.3.1:
+    hash: 6b43f7adae643c8b1c2328fbd6373a68713b3a2b20add52e1483a6e367714713
+    path: patches/deepmerge@4.3.1.patch
+
 importers:
 
   .:
@@ -12266,7 +12271,7 @@ snapshots:
 
   deep-is@0.1.4: {}
 
-  deepmerge@4.3.1: {}
+  deepmerge@4.3.1(patch_hash=6b43f7adae643c8b1c2328fbd6373a68713b3a2b20add52e1483a6e367714713): {}
 
   default-browser-id@5.0.1: {}
 
@@ -14201,7 +14206,7 @@ snapshots:
       babel-jest: 30.2.0(@babel/core@7.29.7)
       chalk: 4.1.2
       ci-info: 4.4.0
-      deepmerge: 4.3.1
+      deepmerge: 4.3.1(patch_hash=6b43f7adae643c8b1c2328fbd6373a68713b3a2b20add52e1483a6e367714713)
       glob: 10.5.0
       graceful-fs: 4.2.11
       jest-circus: 30.2.0(babel-plugin-macros@3.1.0)
