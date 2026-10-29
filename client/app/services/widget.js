@@ -162,8 +162,8 @@ class Widget {
       const queryResult = this.getQuery().getQueryResult(maxAge);
       this.queryResult = queryResult;
 
-      queryResult
-        .toPromise()[0]
+      const promises = queryResult.toPromise();
+      promises[0]
         .then((result) => {
           if (this.queryResult === queryResult) {
             this.loading = false;
@@ -178,6 +178,13 @@ class Widget {
           }
           return error;
         });
+      if (promises[1]) {
+        promises[1].then((result) => {
+          if (this.queryResult === queryResult) {
+            this.data = result;
+          }
+        });
+      }
     }
 
     return this.queryResult.toPromise()[0];

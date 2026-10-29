@@ -51,8 +51,17 @@ function getColumnFriendlyName(column) {
 }
 
 const createOrSaveUrl = (data) => (data.id ? `api/query_results/${data.id}` : "api/query_results");
+
+function fetchQueryResultJson(queryId, resultId, partial) {
+  const partialParam = partial ? "true" : "false";
+  if (queryId != null) {
+    return axios.get(`api/queries/${queryId}/results/${resultId}.json?partial=${partialParam}`);
+  }
+  return axios.get(`api/query_results/${resultId}?partial=${partialParam}`);
+}
+
 const QueryResultResource = {
-  get: ({ id }) => axios.get(`api/query_results/${id}`),
+  get: ({ id, partial }) => fetchQueryResultJson(null, id, partial === true),
   post: (data) => axios.post(createOrSaveUrl(data), data),
 };
 
@@ -150,7 +159,7 @@ class QueryResult {
 
     if ("query_result" in props) {
       this.status = ExecutionStatus.DONE;
-      (instance > 0 ? this.deferred : this.deferred2).onStatusChange(ExecutionStatus.DONE);
+      (instance > 0 ? this.deferred2 : this.deferred).onStatusChange(ExecutionStatus.DONE);
 
       const columnTypes = {};
 
@@ -344,6 +353,7 @@ class QueryResult {
   toPromise(statusCallback) {
     if (statusCallback) {
       this.deferred.onStatusChange = statusCallback;
+      this.deferred2.onStatusChange = statusCallback;
     }
     return [this.deferred.promise, this.deferred2.promise2];
   }
@@ -354,28 +364,22 @@ class QueryResult {
     queryResult.isLoadingResult = true;
     queryResult.deferred.onStatusChange(ExecutionStatus.LOADING_RESULT);
 
-    axios
-      .get(`api/queries/${queryId}/results/${id}.json?partial=${partial}`)
+    fetchQueryResultJson(queryId, id, partial)
       .then((response) => {
-        // Success handler
         queryResult.isLoadingResult = false;
         queryResult.update(response, 0);
 
-        axios
-          .get(`api/queries/${queryId}/results/${id}.json?partial=false`)
-          .then((response) => {
-            // Success handler
+        return fetchQueryResultJson(queryId, id, false)
+          .then((fullResponse) => {
             queryResult.isLoadingResult = false;
-            queryResult.update(response, 1);
+            queryResult.update(fullResponse, 1);
           })
           .catch((error) => {
-            // Error handler
             queryResult.isLoadingResult = false;
             handleErrorResponse(queryResult, error, 1);
           });
       })
       .catch((error) => {
-        // Error handler
         queryResult.isLoadingResult = false;
         handleErrorResponse(queryResult, error, 0);
       });
@@ -394,43 +398,53 @@ class QueryResult {
       });
   }
 
-  loadResult(tryCount, first = true) {
+  loadResult(tryCount, first = true, queryId) {
     this.isLoadingResult = true;
     this.deferred.onStatusChange(ExecutionStatus.LOADING_RESULT);
 
-    QueryResultResource.get({ id: this.job.query_result_id, partial: first })
-      .then((response) => {
-        this.update(response);
+    const resultId = this.job.query_result_id;
+    const loadFull = () =>
+      fetchQueryResultJson(queryId, resultId, false).then((response) => {
         this.isLoadingResult = false;
-      })
-      .catch((error) => {
-        if (tryCount === undefined) {
-          tryCount = 0;
-        }
-
-        if (tryCount > 3) {
-          logger("Connection error while trying to load result", error);
-          this.update({
-            job: {
-              error: "failed communicating with server. Please check your Internet connection and try again.",
-              status: 4,
-            },
-          });
-          this.isLoadingResult = false;
-        } else {
-          setTimeout(
-            () => {
-              this.loadResult(tryCount + 1, false);
-            },
-            1000 * Math.pow(2, tryCount)
-          );
-        }
+        this.update(response, first ? 1 : 0);
       });
+
+    const request = first
+      ? fetchQueryResultJson(queryId, resultId, true).then((response) => {
+          this.isLoadingResult = false;
+          this.update(response, 0);
+          return loadFull();
+        })
+      : loadFull();
+
+    request.catch((error) => {
+      if (tryCount === undefined) {
+        tryCount = 0;
+      }
+
+      if (tryCount > 3) {
+        logger("Connection error while trying to load result", error);
+        this.update({
+          job: {
+            error: "failed communicating with server. Please check your Internet connection and try again.",
+            status: 4,
+          },
+        });
+        this.isLoadingResult = false;
+      } else {
+        setTimeout(
+          () => {
+            this.loadResult(tryCount + 1, false, queryId);
+          },
+          1000 * Math.pow(2, tryCount)
+        );
+      }
+    });
   }
 
   refreshStatus(query, parameters, tryNumber = 1) {
     const loadResult = () =>
-      Auth.isAuthenticated() ? this.loadResult() : this.loadLatestCachedResult(query, parameters);
+      Auth.isAuthenticated() ? this.loadResult(undefined, true, query) : this.loadLatestCachedResult(query, parameters);
 
     const request = Auth.isAuthenticated()
       ? axios.get(`api/jobs/${this.job.id}`)

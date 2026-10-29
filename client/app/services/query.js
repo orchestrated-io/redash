@@ -116,7 +116,8 @@ export class Query {
         });
       }
     } else if (this.latest_query_data_id && maxAge !== 0) {
-      if (!this.queryResult) {
+      const cachedResultId = this.queryResult && this.queryResult.getId();
+      if (!this.queryResult || cachedResultId !== this.latest_query_data_id) {
         this.queryResult = QueryResult.getById(this.id, this.latest_query_data_id, true);
       }
     } else {
