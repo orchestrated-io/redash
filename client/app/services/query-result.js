@@ -52,9 +52,13 @@ function getColumnFriendlyName(column) {
 
 const createOrSaveUrl = (data) => (data.id ? `api/query_results/${data.id}` : "api/query_results");
 
+function isNumericQueryId(queryId) {
+  return queryId != null && /^\d+$/.test(String(queryId));
+}
+
 function fetchQueryResultJson(queryId, resultId, partial) {
   const partialParam = partial ? "true" : "false";
-  if (queryId != null) {
+  if (isNumericQueryId(queryId)) {
     return axios.get(`api/queries/${queryId}/results/${resultId}.json?partial=${partialParam}`);
   }
   return axios.get(`api/query_results/${resultId}?partial=${partialParam}`);
@@ -442,13 +446,15 @@ class QueryResult {
     });
   }
 
-  refreshStatus(query, parameters, tryNumber = 1) {
+  refreshStatus(queryId, parameters, tryNumber = 1) {
     const loadResult = () =>
-      Auth.isAuthenticated() ? this.loadResult(undefined, true, query) : this.loadLatestCachedResult(query, parameters);
+      Auth.isAuthenticated()
+        ? this.loadResult(undefined, true, queryId)
+        : this.loadLatestCachedResult(queryId, parameters);
 
     const request = Auth.isAuthenticated()
       ? axios.get(`api/jobs/${this.job.id}`)
-      : axios.get(`api/queries/${query}/jobs/${this.job.id}`);
+      : axios.get(`api/queries/${queryId}/jobs/${this.job.id}`);
 
     request
       .then((jobResponse) => {
@@ -466,7 +472,7 @@ class QueryResult {
             waitTime = 3000;
           }
           setTimeout(() => {
-            this.refreshStatus(query, parameters, tryNumber + 1);
+            this.refreshStatus(queryId, parameters, tryNumber + 1);
           }, waitTime);
         }
       })
@@ -533,7 +539,7 @@ class QueryResult {
         queryResult.update(response);
 
         if ("job" in response) {
-          queryResult.refreshStatus(query, parameters);
+          queryResult.refreshStatus(queryId, parameters);
         }
       })
       .catch((error) => {
