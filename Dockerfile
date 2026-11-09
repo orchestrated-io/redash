@@ -53,9 +53,9 @@ RUN useradd --create-home redash
 # OS packages: Athena-only images skip DB driver build deps (MariaDB client, ODBC, etc.).
 RUN <<EOF
   set -e
-  install_trixie_security_brotli() {
-    # DSA-6582 / CVE-2026-111497: trixie main ships brotli 1.1.0-2; fix is in trixie-security.
-    apt-get install -y --no-install-recommends -t trixie-security libbrotli1
+  install_trixie_security_runtime_libs() {
+    # DSA-6582 / CVE-2026-111497, DSA-6613 / CVE-2026-85091 & CVE-2026-76844 — trixie-security.
+    apt-get install -y --no-install-recommends -t trixie-security libbrotli1 zlib1g
   }
   db_build_deps=""
   if echo "$install_groups" | tr ',' ' ' | grep -qx all_ds; then
@@ -77,7 +77,7 @@ RUN <<EOF
     unzip \
     ${db_build_deps}
   apt-get upgrade -y --no-install-recommends
-  install_trixie_security_brotli
+  install_trixie_security_runtime_libs
   apt-get clean
   rm -rf /var/lib/apt/lists/*
 EOF
@@ -148,7 +148,7 @@ RUN <<EOF
   apt-get purge -y --auto-remove ${purge}
   apt-get autoremove -y --purge
   apt-get upgrade -y --no-install-recommends
-  apt-get install -y --no-install-recommends -t trixie-security libbrotli1
+  apt-get install -y --no-install-recommends -t trixie-security libbrotli1 zlib1g
   apt-get clean
   rm -rf /var/lib/apt/lists/*
 EOF
